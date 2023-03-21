@@ -59,40 +59,6 @@
 "     Create a form to display the total number of books, total available books, and total loaned books.
 "     Implement a form to display the most popular authors and books, based on the number of times they were loaned.
 
-
-""""""""""""""""""""""""""""""""Feedback""""""""""""""""""""""""""""""""""""""
-" Here is the feedback on the second part of the program:
-" 1) Consistency in commenting: Maintain a consistent commenting style in your code. For example,
-"    you have comments like '""""""""""""""""""""""""""""Books"""""""""""""""""""""""""""""""""""""""'
-"    which looks unprofessional. Use a consistent style for section dividers and inline comments.
-
-"  2) FORM name convention: It is recommended to use a consistent naming convention for your FORMs.
-"     For instance, you have FORMs like 'find_by_author', 'find_by_year_range', 'update_book_availability', and
-"    'check_due_time', which follow a consistent pattern, but 'body', 'populate_tables', and 'cal_date_diff' don't.
-"     Consider renaming them to better reflect their functionality.
-
-"  3) Typo: In the 'update_book_availability' FORM, you have a typo in the comment 'UPDATE libray'. It should be 'UPDATE library'.
-
-"  4) Code readability: You have quite a few lines of code that are very long and difficult to read.
-"     Consider breaking long lines of code into multiple lines using the concatenation operator (&&) for better readability.
-
-"  5) Use of string literals: In some parts of the code, you use string literals for dates (e.g., '00000000').
-"     Consider defining constants with meaningful names instead.
-
-"  6) Error handling: You should add error handling in the code for cases where the user inputs invalid data or
-"     when some other unexpected situations arise. For example, you can use exception handling or messages to handle
-"     errors and inform the user about the issue.
-
-"  7) Code optimization: Some parts of the code can be optimized to reduce redundancy. For instance, you can create a
-"     separate FORM for date formatting and reuse it in multiple places instead of having similar code in different FORMs.
-
-"  8) Better variable naming: Use descriptive variable names to improve code readability. For example, instead of using
-"    'left_time', use 'days_remaining' or 'days_left' to better convey the meaning of the variable.
-
-"  Overall, the second part of the program follows a similar structure to the first part and has the same level of organization.
-"  The code is mostly well-written, but the points mentioned above should be addressed to improve the code
-"  quality, readability, and maintainability.
-
 REPORT z_11_internaltable_advance.
 
 "********************************************************************************
