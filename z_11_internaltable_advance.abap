@@ -57,6 +57,41 @@
 
 " 5) Add basic statistics and reporting:
 "     Create a form to display the total number of books, total available books, and total loaned books.
+"     Implement a form to display the most popular authors and books, based on the number of times they were loaned.
+
+
+""""""""""""""""""""""""""""""""Feedback""""""""""""""""""""""""""""""""""""""
+" Here is the feedback on the second part of the program:
+" 1) Consistency in commenting: Maintain a consistent commenting style in your code. For example,
+"    you have comments like '""""""""""""""""""""""""""""Books"""""""""""""""""""""""""""""""""""""""'
+"    which looks unprofessional. Use a consistent style for section dividers and inline comments.
+
+"  2) FORM name convention: It is recommended to use a consistent naming convention for your FORMs.
+"     For instance, you have FORMs like 'find_by_author', 'find_by_year_range', 'update_book_availability', and
+"    'check_due_time', which follow a consistent pattern, but 'body', 'populate_tables', and 'cal_date_diff' don't.
+"     Consider renaming them to better reflect their functionality.
+
+"  3) Typo: In the 'update_book_availability' FORM, you have a typo in the comment 'UPDATE libray'. It should be 'UPDATE library'.
+
+"  4) Code readability: You have quite a few lines of code that are very long and difficult to read.
+"     Consider breaking long lines of code into multiple lines using the concatenation operator (&&) for better readability.
+
+"  5) Use of string literals: In some parts of the code, you use string literals for dates (e.g., '00000000').
+"     Consider defining constants with meaningful names instead.
+
+"  6) Error handling: You should add error handling in the code for cases where the user inputs invalid data or
+"     when some other unexpected situations arise. For example, you can use exception handling or messages to handle
+"     errors and inform the user about the issue.
+
+"  7) Code optimization: Some parts of the code can be optimized to reduce redundancy. For instance, you can create a
+"     separate FORM for date formatting and reuse it in multiple places instead of having similar code in different FORMs.
+
+"  8) Better variable naming: Use descriptive variable names to improve code readability. For example, instead of using
+"    'left_time', use 'days_remaining' or 'days_left' to better convey the meaning of the variable.
+
+"  Overall, the second part of the program follows a similar structure to the first part and has the same level of organization.
+"  The code is mostly well-written, but the points mentioned above should be addressed to improve the code
+"  quality, readability, and maintainability.
 
 REPORT z_11_internaltable_advance.
 
@@ -307,7 +342,7 @@ FORM find_by_year_range using start_date type d end_date type d.
     if SY-SUBRC = 0.
       perform body using book_instance.
     else.
-      write:/ 'There were no records with Date in ( = ' && start_date && ' - ' && end_date && ' )' .
+      write:/ 'There were no records with Date in ( = ' && start_date && ' - ' && end_date && ' )'.
     endif.
   endloop.
 
@@ -380,6 +415,7 @@ form loan_a_member using
   endif.
 
   loop at Library assigning <fs_book_instance>.
+    data left_time type i.
     if ( <fs_book_instance>-id = book_id or <fs_book_instance>-title = title ).
       if <fs_book_instance>-copy - 1 >= 0.
         loop at Members assigning <fs_member_instance>.
@@ -387,13 +423,9 @@ form loan_a_member using
             write: 'You have'. write: <fs_book_instance>-copy && ' copies. Loaning one | Processing ...| to '. write: name. write id.
             <fs_book_instance>-copy = <fs_book_instance>-copy - 1.
             <fs_book_instance>-rent_date = sy-datum.
+            perform cal_date_diff_instance using <fs_book_instance> changing left_time.
 
-            DATA: days type i, date type d.
-            days = <fs_book_instance>-loan_duration_days.
-            date = <fs_book_instance>-rent_date.
-            ADD days TO date.
-            DATA(left_time) = date - SY-datum .
-            <fs_book_instance>-loan_duration_days = left_time.
+            <fs_book_instance>-loan_duration_days = left_time * ( '-1' ).
             <fs_book_instance>-is_due = 'Rented today'.
 
             loan_instance = value #( member_id = <fs_member_instance>-member_id book_id = <fs_book_instance>-id ).
@@ -466,7 +498,7 @@ endform.
 form list_all_overdue.
   write:/ 'Listing all overdue Books' color 2.
   loop at Library into book_instance where is_due CS 'Overdue'.
-     perform body using book_instance.
+    perform body using book_instance.
 
   endloop.
 endform.
@@ -524,38 +556,48 @@ FORM body using getInstance type Book.
   else.
     is_available = 'Not Available'.
   endif.
-  "  color 4 color blue | color 5 green
+  perform coloring using getInstance published_date rent_date left_time is_available.
 
-  if getInstance-availability = abap_false.
-    WRITE: / |{ getInstance-id WIDTH = 15 }|, 5 |{ getInstance-title WIDTH = 40 }|, 45 |{ getInstance-author  WIDTH = 40 }|,
-    70 |{ published_date WIDTH = 20 }|,  90 |{ is_available WIDTH = 20  }|,  110 |{ getInstance-copy WIDTH = 20 }|,
-     120 |{ getInstance-loan_duration_days WIDTH = 20 }|, 135 |{ rent_date WIDTH = 10 }| ,
-      150 |{ getInstance-is_due WIDTH = 25 }|.
+endform.
+"********************************************************************************
+"* Function Module: write_book_info
+"* Purpose: Display the coloring to avoid code duplication
+"********************************************************************************
+FORM coloring using
+                  instance type Book
+                  published_date type string
+                  rent_date type string
+                  left_time type i
+                  is_available type string.
 
+  DATA: color1 TYPE sy-linct,
+        color2 TYPE sy-linct.
+
+  if instance-availability = abap_false.
+    color1 = sy-linct. " Green
+    color2 = sy-linct. " Green
   elseif left_time <= 0.
-    if getInstance-is_due = 'Rented today' or  getInstance-is_due =  'Returned today'.
-      WRITE: / |{ getInstance-id WIDTH = 15 }| color 4, 5 |{ getInstance-title WIDTH = 40 }| color 4,
-     45 |{ getInstance-author  WIDTH = 40 }| color 4, 70 |{ published_date WIDTH = 20 }| color 4,
-      90 |{ is_available WIDTH = 20  }| color 4,  110 |{ getInstance-copy WIDTH = 20 }| color 4,
-         120 |{ getInstance-loan_duration_days WIDTH = 20 }| color 4, 135 |{ rent_date WIDTH = 20 }| color 4,
-             150 |{ getInstance-is_due WIDTH = 25 }| color 5. "Green
+    color1 = 4. " Green
+    if instance-is_due = 'Rented today' or  instance-is_due =  'Returned today'.
+      color2 = 5. " Green
     else.
-      WRITE: / |{ getInstance-id WIDTH = 15 }| color 4, 5 |{ getInstance-title WIDTH = 40 }| color 4,
-     45 |{ getInstance-author  WIDTH = 40 }| color 4, 70 |{ published_date WIDTH = 20 }| color 4,
-      90 |{ is_available WIDTH = 20  }| color 4,  110 |{ getInstance-copy WIDTH = 20 }| color 4,
-         120 |{ getInstance-loan_duration_days WIDTH = 20 }| color 4, 135 |{ rent_date WIDTH = 20 }| color 4,
-             150 |{ getInstance-is_due WIDTH = 25 }| color 6. "RED
+      color2 = 6. " Green
     endif.
   else.
-    WRITE: / |{ getInstance-id WIDTH = 15 }| color 4, 5 |{ getInstance-title WIDTH = 40 }|  color 4,
-    45 |{ getInstance-author  WIDTH = 40 }|  color 4, 70 |{ published_date WIDTH = 20 }|  color 4,
-         90 |{ is_available WIDTH = 20  }|  color 4,  110 |{ getInstance-copy WIDTH = 20 }|  color 4,
-            120 |{ getInstance-loan_duration_days WIDTH = 20 }|  color 4, 135 |{ rent_date WIDTH = 20 }|  color 4,
-              150 |{ getInstance-is_due WIDTH = 25 }|  color 4.
+    color1 = 4. " Green
+    color2 = 4. " Green
   endif.
+  WRITE: / |{ instance-id WIDTH = 15 }| COLOR = color1,
+         5 |{ instance-title WIDTH = 40 }| COLOR = color1,
+         45 |{ instance-author  WIDTH = 40 }| COLOR = color1,
+         70 |{ published_date WIDTH = 20 }| COLOR = color1,
+         90 |{ is_available WIDTH = 20  }| COLOR = color1,
+         110 |{ instance-copy WIDTH = 20 }| COLOR = color1,
+         120 |{ instance-loan_duration_days WIDTH = 20 }| COLOR = color1,
+         135 |{ rent_date WIDTH = 20 }| COLOR = color1,
+         150 |{ instance-is_due WIDTH = 25 }| COLOR = color2.
   write:/.
-endform.
-
+ENDFORM.
 "********************************************************************************
 "* Function Module: display_loan_table
 "* Purpose: Display The Loan table in a structured manners
@@ -584,6 +626,7 @@ form cal_date_diff using ref_instance type ref to Book changing value(left_time)
   date = ref_instance->rent_date.
   ADD days TO date.
   left_time = SY-datum - date.
+
 endform.
 
 "********************************************************************************
