@@ -64,26 +64,13 @@
 
 REPORT z_13_oop_advance.
 
-include Z_CUSTOMER.
-
+Include  z_customer.
 "********************************************************************************
 "* Class: Store
 "* Purpose: DEFINITION for Store Class
 "********************************************************************************
 CLASS Store DEFINITION.
   PUBLIC SECTION.
-    TYPES: BEGIN OF Product,
-             product_id   TYPE I,
-             name         TYPE string,
-             desc         TYPE string,
-             category     TYPE string,
-             price        TYPE p length 10 decimals 2,
-             is_available TYPE abap_bool,  " Availability
-           END OF Product.
-
-    DATA: Inventory            TYPE TABLE OF Product,
-          product_instance     TYPE Product,
-          ref_product_instnace type ref to  Product.
     Class-DATA: product_id_counter type i value 1.
 
     METHODS:
@@ -102,8 +89,6 @@ CLASS Store DEFINITION.
     methods: check_if_exists importing id type i RETURNING VALUE(is_exists) TYPE abap_bool,
       display_product importing instance type Product.
 ENDCLASS.
-
-
 "********************************************************************************
 "* Class: Store
 "* Purpose: IMPLEMENTATION for Store Inventory
@@ -368,9 +353,12 @@ START-OF-SELECTION.
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 8 ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 8 ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 20 product_id = 8 ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 56 ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 50 product_id = 50 ).
 
   gamestore_customer_cart->display_cutomer_cart(  ).
   gamestore_customer_cart->update_item( cart_id = 1 customer_id = 50 product_id = 2 ).
+  gamestore_customer_cart->update_item( cart_id = 1 customer_id = 1 product_id = 50 ).
   gamestore_customer_cart->delete_item( 1 ).
 
   gamestore_customer_cart->sort_by_product_id(  ).

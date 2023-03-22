@@ -2,32 +2,12 @@
 *&  Include  z_customer
 *&---------------------------------------------------------------------*
 
+Include  z_decleration.
+
 "********************************************************************************
 "* Class: User
 "* Purpose: DEFINITION for User Class
 "********************************************************************************
-Types: begin of User_struct,
-         customer_id   type i,
-         name          type string,
-         email         type string,
-         password      type string,
-         premium       type abap_bool,
-         flag          type abap_bool,
-         flag_comments type string,
-       end of User_struct.
-
-DATA: Customer              type table of User_struct,
-      customer_instance     type User_struct,
-      ref_customer_instance type ref to  User_struct.
-
-Types: begin of Cart_struct,
-         cart_id     type i,
-         customer_id type i,
-         product_id  type i,
-       end of Cart_struct.
-
-DATA: Customer_cart type table of Cart_struct,
-      cart_instance type Cart_struct.
 
 Class User definition.
   public section.
@@ -212,18 +192,9 @@ Class Cart definition.
       display_cutomer_cart,
       display_cart importing instance type Cart_struct.
   private section.
-    methods check_if_customer_exists importing id type i returning value(is_exists) type abap_bool.
 endclass.
 
 Class Cart implementation.
-  "********************************************************************************
-  "* Private Method: check_if_customer_exists
-  "* Purpose: Checking if a customer exists before processing
-  "********************************************************************************
-  method check_if_customer_exists.
-    READ table Customer into customer_instance with key customer_id = id.
-    is_exists = sy-subrc = 0.
-  endmethod.
   "********************************************************************************
   "* Method: add_item
   "* Purpose: Add item to the cart
@@ -231,11 +202,16 @@ Class Cart implementation.
   method add_item.
     READ table Customer into customer_instance with key customer_id = customer_id.
     if sy-subrc = 0.
-      cart_instance = value #( cart_id = cart_id customer_id = customer_id product_id = product_id ).
-      insert cart_instance into table Customer_cart.
-      cart_id_counter = cart_id_counter + 1.
+      READ table Inventory into product_instance with key product_id = product_id.
+      if sy-subrc = 0.
+        cart_instance = value #( cart_id = cart_id customer_id = customer_id product_id = product_id ).
+        insert cart_instance into table Customer_cart.
+        cart_id_counter = cart_id_counter + 1.
+      else.
+        write:/ 'Product does not exists!' color 6.
+      endif.
     else.
-      write:/ 'Customer does not exists!'.
+      write:/ 'Customer does not exists!' color 6.
     endif.
   endmethod.
   "********************************************************************************
@@ -244,23 +220,29 @@ Class Cart implementation.
   "********************************************************************************
   method update_item.
     DATA(title) = 'UPDATE Customer_cart set ... where id = ' && cart_id.
-    write: title color 2.
+    write:/ title color 2.
     Read table Customer_cart into cart_instance with key cart_id = cart_id.
     if sy-subrc = 0.
       READ table Customer into customer_instance with key customer_id = customer_id.
       if sy-subrc = 0.
-        write:/'Customer cart before editing:'.
-        display_cart( instance = cart_instance ).
-        cart_instance-customer_id = customer_id.
-        cart_instance-product_id = product_id.
-        write:/'Customer cart after editing:'.
-        display_cart( instance = cart_instance ).
+        READ table Inventory into product_instance with key product_id = product_id.
+        if sy-subrc = 0.
+          write:/'Customer cart before editing:'.
+          display_cart( instance = cart_instance ).
+          cart_instance-customer_id = customer_id.
+          cart_instance-product_id = product_id.
+          write:/'Customer cart after editing:'.
+          display_cart( instance = cart_instance ).
+        else.
+          write:/ 'You cant update this customer. The product_id : ' && product_id && ' does not exists!' color 6.
+        endif.
       else.
-        write: 'You cant update this customer. The Id : ' && customer_id && ' does not exists!'.
+        write:/ 'You cant update this customer. The customer_id : ' && customer_id && ' does not exists!' color 6.
       endif.
     else.
-      write: 'No item with the Id: ' && cart_id && ' exists!'.
+      write:/ 'No item with the Id: ' && cart_id && ' exists!'.
     endif.
+    uline.
   endmethod.
   "********************************************************************************
   "* Method: delete_item
@@ -277,6 +259,7 @@ Class Cart implementation.
     else.
       write:/ 'No Cusomer Cart exists with ID ' && id.
     endif.
+    uline.
   endmethod.
   "********************************************************************************
   "* Method: sort_by_customer_id
