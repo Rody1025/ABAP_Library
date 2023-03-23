@@ -33,7 +33,7 @@ CLASS Review IMPLEMENTATION.
     ELSE.
       READ TABLE Inventory into product_instance with key product_id = product_id.
       IF sy-subrc = 0.
-        WRITE:/ 'You need to purchese' && product_instance-name && ' before reviewing it!'.
+        WRITE:/ 'You need to purchese :' && product_instance-name && ' before reviewing it!'.
       endif.
     ENDIF.
   ENDMETHOD.
@@ -71,12 +71,46 @@ CLASS Review IMPLEMENTATION.
     ELSE.
       WRITE:/ 'No item has been found!'.
     ENDIF.
+    uline.
   ENDMETHOD.
   "********************************************************************************
   "* Method: cal_average_rating
   "* Purpose: Calculate the average rating
   "********************************************************************************
   method cal_average_rating.
+    DATA(TITLE) = 'Calculating Average'.
+    WRITE:/ TITLE COLOR 2.
+    TYPES: BEGIN OF Rating_struct,
+             product_id TYPE I,
+             counter    TYPE I,
+             average    TYPE P length 10 decimals 2,
+           END OF Rating_struct.
+
+    DATA: Ratings             TYPE STANDARD TABLE OF Rating_struct,
+          rating_instance     TYPE Rating_struct,
+          ref_rating_instance TYPE ref to Rating_struct,
+          counter             type i value 0.
+
+    LOOP AT Customer_review INTO review_instance.
+      Read Table Ratings reference into ref_rating_instance with key product_id = review_instance-product_id.
+      IF sy-subrc = 0.
+        ref_rating_instance->counter = ref_rating_instance->counter + 1.
+      ELSE.
+        rating_instance = value #( product_id = review_instance-product_id counter = 1 average = 1 ).
+        append rating_instance to Ratings.
+      ENDIF.
+    ENDLOOP.
+
+    DATA(len) = LINES( Ratings ).
+    " Calculate the average rating for each product
+    LOOP AT Ratings reference into ref_rating_instance where counter > 0.
+      ref_rating_instance->average =    rating_instance-counter / len.
+    ENDLOOP.
+    Sort Ratings by product_id.
+    " Display the results
+    LOOP AT Ratings INTO rating_instance.
+      WRITE: / 'Product ID:', rating_instance-product_id, 'Average rating:', rating_instance-average.
+    ENDLOOP.
 
   endmethod.
   "********************************************************************************
@@ -87,10 +121,13 @@ CLASS Review IMPLEMENTATION.
     WRITE:/ '------------------------------------------Customer Review Table----------------------------------------------------------------------------------------------' COLOR 2.
     WRITE: /       |ID    |, 15 |Customer ID           |, 35 |Product ID            |, 55 |Review            |.
     WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
-
+    DATA total_items TYPE I.
     LOOP AT Customer_review INTO review_instance.
       display_review( instance = review_instance ).
+      total_items = total_items + 1.
     ENDLOOP.
+    DATA(total_in_string) = '=> Total reconds:' && total_items.
+    WRITE: total_in_string COLOR 5.
     ULINE.
   ENDMETHOD.
   "********************************************************************************

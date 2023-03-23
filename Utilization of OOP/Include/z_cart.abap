@@ -231,7 +231,7 @@ CLASS Cart IMPLEMENTATION.
   "********************************************************************************
   METHOD display_cart_table.
     WRITE:/ '------------------------------------------Customer Cart Table----------------------------------------------------------------------------------------------' COLOR 2.
-    WRITE: /       |ID    |, 15 |Customer ID           |, 35 |Product ID            |, 45 |Historization       |.
+    WRITE: /       |ID    |, 15 |Customer ID           |, 35 |Product ID            |, 50 |Historization       |.
     WRITE:/ '-----------------------------------------------------------------------------------------------------------------------------------------------------------'.
     Data counter type i value 0.
     LOOP AT Customer_cart INTO cart_instance WHERE history_flag = history_flag.
@@ -262,7 +262,7 @@ CLASS Cart IMPLEMENTATION.
     WRITE: / |{ instance-cart_id WIDTH = 15 }| COLOR = color1,
     15 |{ instance-customer_id WIDTH = 45 }| COLOR = color1,
     35 |{ instance-product_id  WIDTH = 40 }| COLOR = color1,
-    45 |{ is_history  WIDTH = 30 }| COLOR = color2.
+    50 |{ is_history  WIDTH = 30 }| COLOR = color2.
     WRITE:/.
   ENDMETHOD.
   "********************************************************************************
