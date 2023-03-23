@@ -29,9 +29,11 @@ CLASS Cart DEFINITION.
                  customer_id TYPE i,
       purchase  IMPORTING
                   customer_id TYPE i,
-      history IMPORTING
-                customer_id  TYPE i
-                history_flag TYPE abap_bool,
+      login_and_view IMPORTING
+                       customer_id       TYPE i
+                       customer_email    TYPE string
+                       customer_password TYPE string
+                       history_flag      TYPE abap_bool,
       display_cart_table  IMPORTING
                             history_flag TYPE abap_bool,
       display_cart_with_names IMPORTING
@@ -226,28 +228,47 @@ CLASS Cart IMPLEMENTATION.
     ULINE.
   ENDMETHOD.
   "********************************************************************************
-  "* Method: history
-  "* Purpose: This method enable us to view the history of the purchased items for a certain customer
+  "* Method: login_and_view
+  "* Purpose: This method enable us to view the login_and_view of the purchased items for a certain customer
   "********************************************************************************
-  METHOD history.
-    DATA(name) = get_customer_name( customer_id ).
-    DATA total_price TYPE p length 10 DECIMALS 2.
-    WRITE:/ '------------------------------------------Purchased item for :' && name && '----------------------------------------------------------------------------------------------' COLOR 2.
-    WRITE: /       |ID    |,  15 |Product ID            |, 30 |Product Name            |, 70 |Product Price            |..
-    WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
-    LOOP AT Customer_cart INTO cart_instance WHERE customer_id = customer_id AND history_flag = history_flag.
-      READ TABLE Inventory INTO product_instance WITH KEY product_id = cart_instance-product_id.
-      IF sy-subrc = 0.
-        WRITE: / |{ cart_instance-cart_id WIDTH = 15 }| COLOR 4,
-        15 |{ cart_instance-product_id WIDTH = 20 }| COLOR 4,
-        30 |{ product_instance-name  WIDTH = 40 }| COLOR 4,
-        70 |{ product_instance-price  WIDTH = 20 }| COLOR 4.
-        total_price = total_price + product_instance-price.
-        WRITE:/.
-      ENDIF.
-    ENDLOOP.
-    DATA(total_in_string) = '=> Total reconds:' && total_price.
-    WRITE: total_in_string COLOR 5.
+  METHOD login_and_view.
+    uline.
+    DATA(TITLE) = 'Login |' && ' Enter you username and password'.
+    WRITE:/ TITLE COLOR 2.
+    READ TABLE Customer INTO customer_instance WITH KEY customer_id = customer_id.
+    IF sy-subrc = 0.
+      DATA(name) = customer_instance-name.
+      DATA(email) = customer_instance-email.
+      DATA(password) = customer_instance-password.
+      write:/ 'User entered their username and password | Checking ...'.
+      WRITE: /    |Type    |,  10 |Email    |,  30 |Password            |.
+      WRITE: / |{ 'Input' WIDTH = 15 }| COLOR 4,    10 |{ customer_email WIDTH = 30 }| COLOR 4, 38 |{ customer_password WIDTH = 20 }| COLOR 4.
+      WRITE: / |{ 'Database' WIDTH = 15 }| COLOR 4, 10 |{ email WIDTH = 30 }| COLOR 4, 38 |{ password WIDTH = 20 }| COLOR 4.
+      if customer_email = email and customer_password = password.
+        DATA total_price TYPE p length 10 DECIMALS 2.
+        write:/ 'Login done successfully. Welcome :' && name color 1.
+        WRITE:/ '------------------------------------------Purchased item for :' && name && '----------------------------------------------------------------------------------------------' COLOR 2.
+        WRITE: /       |ID    |,  15 |Product ID            |, 30 |Product Name            |, 70 |Product Price            |.
+        WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
+        LOOP AT Customer_cart INTO cart_instance WHERE customer_id = customer_id AND history_flag = history_flag.
+          READ TABLE Inventory INTO product_instance WITH KEY product_id = cart_instance-product_id.
+          IF sy-subrc = 0.
+            WRITE: / |{ cart_instance-cart_id WIDTH = 15 }| COLOR 4,
+            15 |{ cart_instance-product_id WIDTH = 20 }| COLOR 4,
+            30 |{ product_instance-name  WIDTH = 40 }| COLOR 4,
+            70 |{ product_instance-price  WIDTH = 20 }| COLOR 4.
+            total_price = total_price + product_instance-price.
+            WRITE:/.
+          ENDIF.
+        ENDLOOP.
+        DATA(total_in_string) = '=> Total reconds:' && total_price.
+        WRITE: total_in_string COLOR 5.
+      else.
+        write:/ 'The Email or the password is incorrect'.
+      endif.
+
+    ENDIF.
+
   ENDMETHOD.
   "********************************************************************************
   "* Method: display_cart_table

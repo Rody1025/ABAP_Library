@@ -390,11 +390,11 @@ START-OF-SELECTION.
   write:/ 'Display all the historized items' color 1.
   gamestore_customer_cart->display_cart_table( abap_true ).
 
-  gamestore_customer_cart->history( customer_id = 1 history_flag = abap_true ).
-  gamestore_customer_cart->history( customer_id = 2 history_flag = abap_true ).
-  gamestore_customer_cart->history( customer_id = 8 history_flag = abap_true ).
-
-
+  gamestore_customer_cart->login_and_view( customer_id = 1 customer_email = 'john.smith@example.com' customer_password = 'P@ssw0rd'  history_flag = abap_true ).
+  gamestore_customer_cart->login_and_view( customer_id = 2 customer_email = 'alice.johnson@example.com' customer_password = 'abc123'  history_flag = abap_true ).
+  gamestore_customer_cart->login_and_view( customer_id = 8 customer_email = 'julia.taylor@example.com' customer_password = 'Tayl0rJ2022'  history_flag = abap_true ).
+  gamestore_customer_cart->login_and_view( customer_id = 8 customer_email = 'julia.taylor@example.com' customer_password = 'Tayl0rJ20222'  history_flag = abap_true ).
+    uline.
   DATA: gamestore_customer_review TYPE REF TO Review.
   gamestore_customer_review = NEW Review(  ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
