@@ -132,8 +132,8 @@ CLASS User IMPLEMENTATION.
   "* Purpose: Find users by name
   "********************************************************************************
   METHOD find_users_by_name.
-    DATA(TITLE) = 'SELECT * from Customer where name LIKE' && name.
-    WRITE: TITLE COLOR 2.
+    DATA(TITLE) = 'SELECT * from Customer where name LIKE :' && name.
+    WRITE:/ TITLE COLOR 2.
     DATA(counter) = 0.
     LOOP AT Customer INTO customer_instance WHERE name CS name.
       display_Customer( instance = customer_instance ).
@@ -170,6 +170,8 @@ CLASS User IMPLEMENTATION.
           color1     TYPE sy-linct,
           color2     TYPE sy-linct,
           color3     TYPE sy-linct.
+
+    DATA: view_name TYPE string VALUE 'ZEXAMPLE_VIEW'.
 
     color1 = 4.
     color2 = 4.

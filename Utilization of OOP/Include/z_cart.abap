@@ -48,7 +48,8 @@ CLASS Cart DEFINITION.
                      instance TYPE Cart_struct,
       get_customer_name IMPORTING
                                   customer_id TYPE i
-                        RETURNING VALUE(name) TYPE string.
+                        RETURNING VALUE(name) TYPE string,
+      display_header.
 ENDCLASS.
 
 CLASS Cart IMPLEMENTATION.
@@ -75,10 +76,10 @@ CLASS Cart IMPLEMENTATION.
         INSERT cart_instance INTO TABLE Customer_cart.
         cart_id_counter = cart_id_counter + 1.
       ELSE.
-        WRITE:/ 'Product does not exists!' COLOR 6.
+        WRITE:/ 'Creating Customer cart ...'. write: '|Product does not exists!' COLOR 6.
       ENDIF.
     ELSE.
-      WRITE:/ 'Customer does not exists!' COLOR 6.
+      WRITE:/ 'Creating Customer cart ....'. write: '|Customer does not exists!' COLOR 6.
     ENDIF.
   ENDMETHOD.
   "********************************************************************************
@@ -171,6 +172,7 @@ CLASS Cart IMPLEMENTATION.
     LOOP AT Customer_cart INTO cart_instance WHERE customer_id = customer_id AND history_flag <> abap_true.
       READ TABLE Inventory INTO product_instance WITH KEY product_id = cart_instance-product_id.
       IF sy-subrc = 0.
+        display_header( ).
         display_cart_with_names( cart_instance = cart_instance product_instance = product_instance ).
         total_price = total_price + product_instance-price.
       ENDIF.
@@ -189,6 +191,7 @@ CLASS Cart IMPLEMENTATION.
     LOOP AT Customer_cart INTO cart_instance WHERE product_id = product_id AND history_flag <> abap_true.
       READ TABLE Inventory INTO product_instance WITH KEY product_id = cart_instance-product_id.
       IF sy-subrc = 0.
+        display_header( ).
         display_cart_with_names( cart_instance = cart_instance product_instance = product_instance ).
       ENDIF.
     ENDLOOP.
@@ -302,7 +305,7 @@ CLASS Cart IMPLEMENTATION.
       is_history = 'Flagged for historization'.
       color2 = 6.
     else.
-      is_history = 'No flag'.
+      is_history = 'NA'.
     endif.
     WRITE: / |{ instance-cart_id WIDTH = 15 }| COLOR = color1,
     15 |{ instance-customer_id WIDTH = 45 }| COLOR = color1,
@@ -318,8 +321,18 @@ CLASS Cart IMPLEMENTATION.
     WRITE: / |{ cart_instance-cart_id WIDTH = 15 }| COLOR 4,
     15 |{ cart_instance-customer_id WIDTH = 45 }| COLOR 4,
     35 |{ cart_instance-product_id  WIDTH = 40 }| COLOR 4,
-    45 |{ product_instance-name  WIDTH = 40 }| COLOR 4,
-    70 |{ product_instance-price  WIDTH = 40 }| COLOR 4.
+    52 |{ product_instance-price  WIDTH = 40 }| COLOR 4,
+    70 |{ product_instance-name  WIDTH = 40 }| COLOR 4.
     WRITE:/.
   ENDMETHOD.
+  "********************************************************************************
+  "* Private Method: display_header
+  "* Purpose: Display table headers
+  "********************************************************************************
+  method display_header.
+    WRITE:/ '------------------------------------------Customer Cart Table----------------------------------------------------------------------------------------------' COLOR 2.
+    WRITE: /       |ID    |, 15 |Customer ID           |, 35 |Product ID           |,  52 |Product Title            |, 70 |Price       |.
+    WRITE:/ '-----------------------------------------------------------------------------------------------------------------------------------------------------------'.
+
+  endmethod.
 ENDCLASS.

@@ -10,6 +10,7 @@ CLASS Store DEFINITION.
     CLASS-DATA: product_id_counter TYPE I VALUE 1.
 
     METHODS:
+      constructor,
       add_product IMPORTING
                     ID           TYPE I
                     name         TYPE string
@@ -43,6 +44,20 @@ ENDCLASS.
 "* Purpose: IMPLEMENTATION for Store Inventory
 "********************************************************************************
 CLASS store IMPLEMENTATION.
+  "********************************************************************************
+  "* Method: constructor
+  "* Purpose: Class constructor, called when creating the class
+  "********************************************************************************
+  method constructor.
+    WRITE:/ 'Color Indications' Color 1.
+    WRITE: /       |Color    |, 12 |Meaning   |.
+    WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
+    WRITE: / |{ 'Grau' WIDTH = 15 }| COLOR 1, 12 |{ 'Processing something' WIDTH = 30 }|.
+    WRITE: / |{ 'RED' WIDTH = 15 }| COLOR 6, 12 |{ 'Item is not available/flagged' WIDTH = 30 }|.
+    WRITE: / |{ 'GREEN' WIDTH = 15 }| COLOR 5, 12 |{ 'Total counter/price' WIDTH = 30 }|.
+    WRITE: / |{ 'Orange' WIDTH = 15 }| COLOR 7, 12 |{ 'Premium' WIDTH = 30 }|.
+    WRITE:/.
+  endmethod.
   "********************************************************************************
   "* Method: add_product
   "* Purpose: Add product to the Inventory
@@ -163,11 +178,10 @@ CLASS store IMPLEMENTATION.
   "* Purpose: Display the Inventory table in a structured manners
   "********************************************************************************
   METHOD display_inventory.
-    WRITE:/ '------------------------------------------Loan Table--------------------------------------------------------------------------------------------------'.
+    WRITE:/ '-------------------------------------------------------------------Product Table-----------------------------------------------------------------------' color 1.
     WRITE: /       |Product ID    |, 15 |Name          |, 60 |Category           |,
     80 |Price         |, 90 |Availability     |, 105 |Description     |.
     WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
-
     LOOP AT Inventory INTO product_instance.
       display_product( instance = product_instance ).
     ENDLOOP.
