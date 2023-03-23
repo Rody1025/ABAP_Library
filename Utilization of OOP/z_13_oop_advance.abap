@@ -57,6 +57,42 @@
 "     Implement a form to display the reviews for a product.
 "     Calculate and display the average rating for each product based on the reviews.
 
+" Extend using other Concept in ABAP:
+
+" 6) Implement a report functionality:
+"     Create a report that displays various information about the products in the internal table,
+"     such as the total number of products, the number of products in each category, the average
+"     price of products, and so on. You can use ABAP function modules like
+"     REUSE_ALV_GRID_DISPLAY or SALV_TABLE to display the report output
+
+" 7) Implement a data validation functionality:
+"     Add data validation logic to ensure that the user-entered data is correct and valid.
+"     For example, you can check that the entered product price is a valid number, or that the
+"     entered email address is in the correct format. You can use ABAP built-in functions like
+"     ISNUMERIC or CL_ABAP_REGEX to perform data validation.
+
+" 8) Implement a logging functionality:
+"     Add logging functionality to track all the important actions performed by the users
+"     and the store staff, such as adding or deleting products, updating user information, or
+"     checking out a cart. You can use ABAP logging frameworks like SLG1 or CL_RSAN_UT_LOG to
+"     create logs and store them in a database table.
+
+" 9) Implement a user roles functionality:
+"     Add user roles functionality to differentiate between different types of users, such
+"     as customers, store staff, or administrators. You can create a custom table to hold the
+"     user roles and use ABAP authorization objects like S_TABU_DIS to control access to
+"     different parts of the application based on the user's role.
+
+" 10) Implement a search help functionality:
+"      Add search help functionality to assist the users in finding the correct product
+"      or user information. You can create search help objects using the ABAP Dictionary and
+"      assign them to the appropriate input fields in your application.
+
+" 11) Implement a lock object functionality:
+"      Add lock object functionality to prevent concurrent access to the same data by
+"      multiple users. You can create lock objects using the ABAP Dictionary and use them to
+"      lock and unlock the relevant data fields in your application.
+
 REPORT z_13_oop_advance.
 
 INCLUDE z_customer.
@@ -102,6 +138,8 @@ START-OF-SELECTION.
 
   gamestore->sort_by_price(  ).
   gamestore->sort_by_id(  ).
+
+  gamestore->generate_report(  ).
 
   DATA: gamestore_customer TYPE REF TO User.
   gamestore_customer = NEW User(  ).

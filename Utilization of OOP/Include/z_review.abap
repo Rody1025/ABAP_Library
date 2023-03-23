@@ -118,8 +118,8 @@ CLASS Review IMPLEMENTATION.
       ref_rating_instance->average = ref_rating_instance->total_rating / ref_rating_instance->counter.
     ENDLOOP.
     Sort Ratings by product_id.
-    WRITE:/ '------------------------------------------Customer Review Rating table---------------------------------------------------------------------------------' COLOR 2.
-    WRITE: /       |Product ID    |, 15 |Average rating           |.
+    WRITE:/ '------------------------------------------Customer Review Rating Table---------------------------------------------------------------------------------' COLOR 2.
+    WRITE: /       |Product ID    |, 15 |Average rating           |, 30 |Product name           |.
     WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
 
     LOOP AT Ratings INTO rating_instance.

@@ -33,7 +33,8 @@ CLASS Store DEFINITION.
                      ID TYPE I,
       sort_by_price,
       sort_by_id,
-      display_inventory.
+      display_inventory,
+      generate_report, check_email_structure.
   PRIVATE SECTION.
     METHODS:
       display_product IMPORTING instance TYPE Product,
@@ -174,6 +175,51 @@ CLASS store IMPLEMENTATION.
     display_inventory(  ).
   ENDMETHOD.
   "********************************************************************************
+  "* Method: generate_report
+  "* Purpose: Generate a report for product, displaying total number of P, number of
+  "* P in each category, average price of products...
+  "********************************************************************************
+  method generate_report.
+    WRITE: 'Generate Report' COLOR 2.
+    TYPES: begin of report_struct,
+             category                type string,
+             num_product_in_category type i,
+             average_price           type P length 10 decimals 2,
+           end of report_struct.
+
+    DATA: Report              type table of report_struct,
+          report_instance     type report_struct,
+          ref_report_instance type ref to report_struct.
+
+    DATA counter type i value 0.
+    Loop at Inventory into product_instance.
+      Read table Report reference into ref_report_instance with key category = product_instance-category.
+      if sy-subrc = 0.
+        ref_report_instance->num_product_in_category = ref_report_instance->num_product_in_category + 1.
+        ref_report_instance->average_price = ref_report_instance->average_price + product_instance-price.
+      else.
+        report_instance = value #( category = product_instance-category
+                                   num_product_in_category = 1 average_price = product_instance-price ).
+        append report_instance to Report.
+      endif.
+      counter = counter + 1.
+    endloop.
+    loop at Report reference into ref_report_instance.
+      ref_report_instance->average_price =  ref_report_instance->average_price / ref_report_instance->num_product_in_category.
+    endloop.
+    WRITE:/ '----------------------------------------------------------Generated Report-----------------------------------------------------------------' COLOR 2.
+    WRITE: /       |Category    |, 15 |Number of Product           |, 40 |Average price           |.
+    WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
+    LOOP AT Report INTO report_instance.
+      WRITE: / |{ report_instance-category WIDTH = 15 }| COLOR 4,
+            15 |{ report_instance-num_product_in_category WIDTH = 35 }| COLOR 4,
+            40 |{ report_instance-average_price WIDTH = 20 }| COLOR 4.
+      WRITE:/.
+    ENDLOOP.
+    DATA(total_in_string) = '=> Total reconds:' && counter.
+    WRITE: total_in_string COLOR 5.
+  endmethod.
+  "********************************************************************************
   "* Method: display_inventory
   "* Purpose: Display the Inventory table in a structured manners
   "********************************************************************************
@@ -190,7 +236,6 @@ CLASS store IMPLEMENTATION.
     WRITE: total_in_string COLOR 5.
     ULINE.
   ENDMETHOD.
-
   "********************************************************************************
   "* Private Method: display_product
   "* Purpose: Display the coloring to avoid code duplication
