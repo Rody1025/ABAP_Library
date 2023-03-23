@@ -19,10 +19,12 @@ Types: begin of Cart_struct,
          cart_id     type i,
          customer_id type i,
          product_id  type i,
+         history_flag  type abap_bool, " have been bought or not!
        end of Cart_struct.
 
 DATA: Customer_cart type table of Cart_struct,
       cart_instance type Cart_struct.
+ Field-symbols: <fs_cart_instance> type Cart_struct.
 
 TYPES: BEGIN OF Product,
          product_id   TYPE I,

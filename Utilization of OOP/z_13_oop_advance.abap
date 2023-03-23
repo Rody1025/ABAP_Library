@@ -342,27 +342,33 @@ START-OF-SELECTION.
 
   DATA: gamestore_customer_cart TYPE REF TO Cart.
   gamestore_customer_cart = New Cart(  ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 1 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 2 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 3 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 2 product_id = 5 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 2 product_id = 6 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 3 product_id = 1 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 5 product_id = 10 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 6 product_id = 9 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 8 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 8 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 20 product_id = 8 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 56 ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 50 product_id = 50 ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 1 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 2 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 3 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 2 product_id = 5 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 2 product_id = 6 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 3 product_id = 1 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 5 product_id = 10 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 6 product_id = 9 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 8 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 8 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 20 product_id = 8  history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 56  history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 50 product_id = 50 history_flag = abap_false ).
 
-  gamestore_customer_cart->display_cutomer_cart(  ).
-  gamestore_customer_cart->update_item( cart_id = 1 customer_id = 50 product_id = 2 ).
-  gamestore_customer_cart->update_item( cart_id = 1 customer_id = 1 product_id = 50 ).
+  gamestore_customer_cart->display_cart_table( abap_false ).
+  gamestore_customer_cart->update_item( cart_id = 1 customer_id = 50 product_id = 2 history_flag = abap_false ).
+  gamestore_customer_cart->update_item( cart_id = 1 customer_id = 1 product_id = 50 history_flag = abap_false ).
   gamestore_customer_cart->delete_item( 1 ).
 
   gamestore_customer_cart->sort_by_product_id(  ).
   gamestore_customer_cart->sort_by_customer_id(  ).
 
-  gamestore_customer_cart->find_all_customer_id( 1 ).
-  gamestore_customer_cart->find_all_product_id( 8 ).
+  gamestore_customer_cart->display_customer_cart( 1 ).
+  gamestore_customer_cart->display_product_cart( 8 ).
+
+  gamestore_customer_cart->checkout( 1 ).
+  gamestore_customer_cart->purchase( 1 ).
+  gamestore_customer_cart->display_cart_table( abap_false ).
+
+  gamestore_customer_cart->history( customer_id = 1 history_flag = abap_true ).
