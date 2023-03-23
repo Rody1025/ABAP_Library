@@ -1,33 +1,48 @@
 *&---------------------------------------------------------------------*
 *&  Include  z_customer
 *&---------------------------------------------------------------------*
-
-INCLUDE z_decleration.
-INCLUDE z_cart.
-INCLUDE z_review.
-
 "********************************************************************************
 "* Class: User
 "* Purpose: DEFINITION for User Class
 "********************************************************************************
+INCLUDE z_decleration.
+INCLUDE z_cart.
+INCLUDE z_review.
+
 CLASS User DEFINITION.
   PUBLIC SECTION.
-  CLASS-DATA: customer_id_counter TYPE I VALUE 1.
+    CLASS-DATA: customer_id_counter TYPE I VALUE 1.
 
-  METHODS:
-  add_customer IMPORTING ID TYPE I name TYPE string email TYPE string password
-    TYPE string premium TYPE abap_bool
-    flag TYPE abap_bool flag_comments TYPE string,
-  update_customer IMPORTING ID TYPE I name TYPE string email TYPE string password
-    TYPE string premium TYPE abap_bool
-    flag TYPE abap_bool flag_comments TYPE string,
-    find_all_flagged,
-  find_users_by_name IMPORTING name TYPE string,
-  delete_cusomter IMPORTING ID TYPE I,
-  check_if_exists IMPORTING ID TYPE I returning VALUE(is_exists) TYPE abap_bool,
-    display_Customer_table,
-  display_Customer IMPORTING instance TYPE User_struct.
+    METHODS:
+      add_customer IMPORTING
+                     ID            TYPE I
+                     name          TYPE string
+                     email         TYPE string
+                     password      TYPE string
+                     premium       TYPE abap_bool
+                     flag          TYPE abap_bool
+                     flag_comments TYPE string,
+      update_customer IMPORTING
+                        ID            TYPE I
+                        name          TYPE string
+                        email         TYPE string
+                        password      TYPE string
+                        premium       TYPE abap_bool
+                        flag          TYPE abap_bool
+                        flag_comments TYPE string,
+      find_all_flagged,
+      find_users_by_name IMPORTING
+                           name TYPE string,
+      delete_cusomter IMPORTING
+                        ID TYPE I,
+      display_Customer_table.
   PRIVATE SECTION.
+    METHODS: check_if_exists IMPORTING
+                                       ID               TYPE I
+                             returning VALUE(is_exists) TYPE abap_bool,
+      display_Customer IMPORTING
+                         instance TYPE User_struct.
+
 ENDCLASS.
 "********************************************************************************
 "* Class: User

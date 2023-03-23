@@ -59,7 +59,7 @@
 
 REPORT z_13_oop_advance.
 
-INCLUDE  z_customer.
+INCLUDE z_customer.
 "********************************************************************************
 "* Class: Store
 "* Purpose: DEFINITION for Store Class
@@ -69,20 +69,33 @@ CLASS Store DEFINITION.
     CLASS-DATA: product_id_counter TYPE I VALUE 1.
 
     METHODS:
-    add_product IMPORTING ID TYPE I name TYPE string desc TYPE string
-      category TYPE string price TYPE p is_available TYPE abap_bool,
-    find_by_category IMPORTING category TYPE string,
-    find_by_keyword IMPORTING keyword TYPE string,
-    find_by_price_range IMPORTING start TYPE p END TYPE p,
-    update_availability_by_id IMPORTING ID TYPE I,
-    update_availability_by_keyword IMPORTING keyword TYPE string,
-    delete_by_id IMPORTING ID TYPE I,
+      add_product IMPORTING
+                    ID           TYPE I
+                    name         TYPE string
+                    desc         TYPE string
+                    category     TYPE string
+                    price        TYPE p
+                    is_available TYPE abap_bool,
+      find_by_category IMPORTING
+                         category TYPE string,
+      find_by_keyword IMPORTING
+                        keyword TYPE string,
+      find_by_price_range IMPORTING
+                            start TYPE p
+                            END   TYPE p,
+      update_availability_by_id IMPORTING
+                                  ID TYPE I,
+      update_availability_by_keyword IMPORTING
+                                       keyword TYPE string,
+      delete_by_id IMPORTING
+                     ID TYPE I,
       sort_by_price,
       sort_by_id,
       display_inventory.
   PRIVATE SECTION.
-    METHODS: check_if_exists IMPORTING ID TYPE I RETURNING VALUE(is_exists) TYPE abap_bool,
-      display_product IMPORTING instance TYPE Product.
+    METHODS:
+      display_product IMPORTING instance TYPE Product,
+      check_if_exists IMPORTING ID TYPE I RETURNING VALUE(is_exists) TYPE abap_bool.
 ENDCLASS.
 "********************************************************************************
 "* Class: Store
@@ -259,7 +272,6 @@ CLASS store IMPLEMENTATION.
   ENDMETHOD.
 ENDCLASS.
 
-
 START-OF-SELECTION.
   DATA: gamestore TYPE REF TO Store.
   gamestore = NEW Store(  ).
@@ -386,33 +398,45 @@ START-OF-SELECTION.
   DATA: gamestore_customer_review TYPE REF TO Review.
   gamestore_customer_review = NEW Review(  ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-    customer_id = 1 product_id = 2 review = 'I absolutely love this product! It works perfectly and has made my life so much easier.' ).
+    customer_id = 1 product_id = 2
+    review = 'I absolutely love this product! It works perfectly and has made my life so much easier.' rating = 1 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-    customer_id = 1 product_id = 8 review = 'This product is amazing! It has exceeded my expectations in every way.' ).
-    gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-    customer_id = 2 product_id = 8 review = 'It''s well-designed and very versatile.' ).
+    customer_id = 1 product_id = 8 review = 'This product is amazing! It has exceeded my expectations in every way.' rating = 4 ).
+  gamestore_customer_review->add_review( review_id =
+  Review=>review_id_counter
+  customer_id = 2 product_id = 8 review = 'It''s well-designed and very versatile.' rating = 2 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-    customer_id = 2 product_id = 4 review = 'I''m very impressed with this product. It''s well-designed and very versatile.' ).
+    customer_id = 2 product_id = 4
+    review = 'I''m very impressed with this product. It''s well-designed and very versatile.' rating = 1 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-    customer_id = 2 product_id = 5 review = 'This product is great! It works exactly as advertised and has made a big difference in my life.' ).
+    customer_id = 2 product_id = 5
+    review = 'This product is great! It works exactly as advertised and has made a big difference in my life.' rating = 2 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-    customer_id = 2 product_id = 6 review = 'I''m very happy with this product! It''s made my daily routine so much smoother and more efficient.' ).
+    customer_id = 2 product_id = 6
+    review = 'I''m very happy with this product! It''s made my daily routine so much smoother and more efficient.' rating = 5 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-  customer_id = 3 product_id = 1 review = 'I love this product! It exceeded my expectations.' ).
+  customer_id = 3 product_id = 1
+  review = 'I love this product! It exceeded my expectations.' rating = 4 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-  customer_id = 8 product_id = 1 review = 'This is a great product! It works very well and is easy to use.' ).
+  customer_id = 8 product_id = 1
+  review = 'This is a great product! It works very well and is easy to use.' rating = 1 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-  customer_id = 8 product_id = 8 review = 'I''m very happy with this product! It''s exactly what I was looking for.' ).
+  customer_id = 8 product_id = 8
+  review = 'I''m very happy with this product! It''s exactly what I was looking for.' rating = 2 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-  customer_id = 8 product_id = 8 review = 'This product is amazing! It''s changed the way I work for the better.' ).
+  customer_id = 8 product_id = 8
+  review = 'This product is amazing! It''s changed the way I work for the better.' rating = 3 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-  customer_id = 4 product_id = 4 review = 'I''m impressed with this product! It''s well-designed and very versatile.' ).
+  customer_id = 4 product_id = 4
+  review = 'I''m impressed with this product! It''s well-designed and very versatile.' rating = 4 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-  customer_id = 6 product_id = 6 review = 'This product is excellent! It''s helped me save time and increase my productivity.' ).
+  customer_id = 6 product_id = 6
+  review = 'This product is excellent! It''s helped me save time and increase my productivity.' rating = 3 ).
   gamestore_customer_review->add_review( review_id = Review=>review_id_counter
-  customer_id = 9 product_id = 10 review = 'This product is excellent! It''s helped me save time and increase my productivity.' ).
+  customer_id = 9 product_id = 10
+  review = 'This product is excellent! It''s helped me save time and increase my productivity.' rating = 3 ).
 
   gamestore_customer_review->display_review_table(  ).
-  gamestore_customer_review->update_review( review_id = 8 review = 'This has been edited!' ).
+  gamestore_customer_review->update_review( review_id = 8 review = 'This has been edited!' rating = 5  ).
   gamestore_customer_review->delete_review( 50 ).
   gamestore_customer_review->cal_average_rating( ).

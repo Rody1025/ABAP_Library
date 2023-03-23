@@ -44,6 +44,7 @@ TYPES: BEGIN OF Review_struct,
   product_id  TYPE I,
   customer_id TYPE I,
   review      TYPE string,
+  rating      TYPE I,
 END OF Review_struct.
 DATA: Customer_review            TYPE TABLE OF Review_struct,
       review_instance     TYPE Review_struct,

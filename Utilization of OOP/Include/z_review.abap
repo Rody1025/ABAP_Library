@@ -4,13 +4,23 @@
 CLASS Review DEFINITION.
   PUBLIC SECTION.
     CLASS-DATA: review_id_counter TYPE I VALUE 1.
-    METHODS: add_review IMPORTING review_id TYPE I customer_id TYPE I product_id TYPE I review TYPE string,
-      update_review IMPORTING review_id TYPE I review TYPE string,
-      delete_review IMPORTING review_id TYPE I,
+    METHODS: add_review IMPORTING
+                          review_id   TYPE I
+                          customer_id TYPE I
+                          product_id  TYPE I
+                          review      TYPE string
+                          rating      type I,
+      update_review IMPORTING
+                      review_id TYPE I
+                      review    TYPE string
+                      rating    type I,
+      delete_review IMPORTING
+                      review_id TYPE I,
       cal_average_rating,
       display_review_table.
   PRIVATE SECTION.
-    METHODS: display_review IMPORTING instance TYPE Review_struct.
+    METHODS: display_review IMPORTING
+                              instance TYPE Review_struct.
 ENDCLASS.
 "********************************************************************************
 "* Class: Review
@@ -27,7 +37,7 @@ CLASS Review IMPLEMENTATION.
                                                          history_flag = abap_true.
     IF sy-subrc = 0.
       review_instance = VALUE #( review_id = review_id customer_id = customer_id product_id = product_id
-                                 review = review ).
+                                 review = review rating = rating ).
       INSERT review_instance INTO TABLE Customer_review.
       review_id_counter = review_id_counter + 1.
     ELSE.
@@ -49,6 +59,7 @@ CLASS Review IMPLEMENTATION.
       write: 'Before the edit!'.
       display_review( review_instance ).
       review_instance-review = review.
+      review_instance-rating = rating.
       write: 'After the edit!'.
       display_review( review_instance ).
     ELSE.
@@ -81,37 +92,45 @@ CLASS Review IMPLEMENTATION.
     DATA(TITLE) = 'Calculating Average'.
     WRITE:/ TITLE COLOR 2.
     TYPES: BEGIN OF Rating_struct,
-             product_id TYPE I,
-             counter    TYPE I,
-             average    TYPE P length 10 decimals 2,
+             product_id   TYPE I,
+             counter      TYPE I,
+             total_rating TYPE I,
+             average      TYPE P length 10 decimals 2,
            END OF Rating_struct.
 
     DATA: Ratings             TYPE STANDARD TABLE OF Rating_struct,
           rating_instance     TYPE Rating_struct,
-          ref_rating_instance TYPE ref to Rating_struct,
-          counter             type i value 0.
+          ref_rating_instance TYPE ref to Rating_struct.
 
     LOOP AT Customer_review INTO review_instance.
       Read Table Ratings reference into ref_rating_instance with key product_id = review_instance-product_id.
       IF sy-subrc = 0.
         ref_rating_instance->counter = ref_rating_instance->counter + 1.
+        ref_rating_instance->total_rating = ref_rating_instance->total_rating + review_instance-rating.
       ELSE.
-        rating_instance = value #( product_id = review_instance-product_id counter = 1 average = 1 ).
-        append rating_instance to Ratings.
+        rating_instance = VALUE #( product_id = review_instance-product_id counter = 1 total_rating = review_instance-rating average = 0 ).
+        APPEND rating_instance TO Ratings.
       ENDIF.
     ENDLOOP.
 
     DATA(len) = LINES( Ratings ).
-    " Calculate the average rating for each product
     LOOP AT Ratings reference into ref_rating_instance where counter > 0.
-      ref_rating_instance->average =    rating_instance-counter / len.
+      ref_rating_instance->average = ref_rating_instance->total_rating / ref_rating_instance->counter.
     ENDLOOP.
     Sort Ratings by product_id.
-    " Display the results
-    LOOP AT Ratings INTO rating_instance.
-      WRITE: / 'Product ID:', rating_instance-product_id, 'Average rating:', rating_instance-average.
-    ENDLOOP.
+    WRITE:/ '------------------------------------------Customer Review Rating table---------------------------------------------------------------------------------' COLOR 2.
+    WRITE: /       |Product ID    |, 15 |Average rating           |.
+    WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
 
+    LOOP AT Ratings INTO rating_instance.
+      READ TABLE Inventory into product_instance with key product_id = rating_instance-product_id.
+      if sy-subrc = 0.
+        WRITE: / |{ rating_instance-product_id WIDTH = 15 }| COLOR 4,
+              15 |{ rating_instance-average WIDTH = 20 }| COLOR 4,
+              30 |{ product_instance-name WIDTH = 40 }| COLOR 4.
+      endif.
+      WRITE:/.
+    ENDLOOP.
   endmethod.
   "********************************************************************************
   "* Method: display_review_table

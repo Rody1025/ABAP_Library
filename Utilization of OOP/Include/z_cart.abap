@@ -3,26 +3,50 @@
 *&---------------------------------------------------------------------*
 CLASS Cart DEFINITION.
   PUBLIC SECTION.
-    CLASS-DATA: cart_id_counter TYPE I VALUE 1.
+    CLASS-DATA: cart_id_counter TYPE i VALUE 1.
     DATA: no_historization TYPE abap_bool VALUE abap_false.
 
-    METHODS: add_item IMPORTING cart_id TYPE I customer_id TYPE I product_id TYPE I history_flag TYPE abap_bool,
-      update_item IMPORTING cart_id TYPE I customer_id TYPE I product_id TYPE I history_flag TYPE abap_bool,
-      delete_item IMPORTING ID TYPE I,
+    METHODS:
+      add_item IMPORTING
+                 cart_id      TYPE i
+                 customer_id  TYPE i
+                 product_id   TYPE i
+                 history_flag TYPE abap_bool,
+      update_item IMPORTING
+                    cart_id      TYPE i
+                    customer_id  TYPE i
+                    product_id   TYPE i
+                    history_flag TYPE abap_bool,
+      delete_item IMPORTING
+                    ID TYPE i,
       sort_by_customer_id,
       sort_by_product_id,
-      display_customer_cart IMPORTING customer_id TYPE I,
-      display_product_cart IMPORTING product_id TYPE I,
-      checkout IMPORTING customer_id TYPE I,
-      purchase IMPORTING customer_id TYPE I,
-      history IMPORTING customer_id TYPE I history_flag TYPE abap_bool,
-      display_cart_table IMPORTING history_flag TYPE abap_bool,
-      display_cart_with_names IMPORTING cart_instance type Cart_struct product_instance type Product.
+      display_customer_cart  IMPORTING
+                               customer_id TYPE i,
+      display_product_cart IMPORTING
+                             product_id TYPE i,
+      checkout IMPORTING
+                 customer_id TYPE i,
+      purchase  IMPORTING
+                  customer_id TYPE i,
+      history IMPORTING
+                customer_id  TYPE i
+                history_flag TYPE abap_bool,
+      display_cart_table  IMPORTING
+                            history_flag TYPE abap_bool,
+      display_cart_with_names IMPORTING
+                                cart_instance    TYPE Cart_struct
+                                product_instance TYPE Product.
 
   PRIVATE SECTION.
-    METHODS: flag_item_by_customer_id IMPORTING customer_id TYPE I,
-      display_cart IMPORTING instance TYPE Cart_struct,
-      get_customer_name IMPORTING customer_id TYPE I returning VALUE(name) TYPE string.
+    METHODS:
+      flag_item_by_customer_id IMPORTING
+                                 customer_id TYPE i,
+      display_cart IMPORTING
+                     instance TYPE Cart_struct,
+      get_customer_name IMPORTING
+                                  customer_id TYPE i
+                        RETURNING VALUE(name) TYPE string.
 ENDCLASS.
 
 CLASS Cart IMPLEMENTATION.
