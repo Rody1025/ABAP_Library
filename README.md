@@ -1,4 +1,4 @@
-# Inventory Management System for an Online Store
+#Inventory Management System for an Online Store
 
 This is a simple software that can manage the product inventory of a small online store. The system allows store staff to perform basic operations like adding, deleting, sorting, and data processing and manipulation.
 ## Table of Contents
