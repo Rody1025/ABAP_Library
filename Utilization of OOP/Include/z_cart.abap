@@ -1,255 +1,280 @@
 *&---------------------------------------------------------------------*
 *&  Include  z_cart
 *&---------------------------------------------------------------------*
-Class Cart definition.
-  public section.
-    Class-DATA: cart_id_counter type i value 1.
-    DATA: no_historization type abap_bool value abap_false.
+CLASS Cart DEFINITION.
+  PUBLIC SECTION.
+    CLASS-DATA: cart_id_counter TYPE I VALUE 1.
+    DATA: no_historization TYPE abap_bool VALUE abap_false.
 
-    methods: add_item importing cart_id type i customer_id type i product_id type i history_flag type abap_bool,
-      update_item importing cart_id type i customer_id type i product_id type i history_flag type abap_bool,
-      delete_item importing id type i,
+    METHODS: add_item IMPORTING cart_id TYPE I customer_id TYPE I product_id TYPE I history_flag TYPE abap_bool,
+      update_item IMPORTING cart_id TYPE I customer_id TYPE I product_id TYPE I history_flag TYPE abap_bool,
+      delete_item IMPORTING ID TYPE I,
       sort_by_customer_id,
       sort_by_product_id,
-      display_customer_cart importing customer_id type i,
-      display_product_cart importing product_id type i,
-      checkout importing customer_id type i,
-      purchase importing customer_id type i,
-      history importing customer_id type i history_flag type abap_bool,
-      display_cart_table importing history_flag type abap_bool.
+      display_customer_cart IMPORTING customer_id TYPE I,
+      display_product_cart IMPORTING product_id TYPE I,
+      checkout IMPORTING customer_id TYPE I,
+      purchase IMPORTING customer_id TYPE I,
+      history IMPORTING customer_id TYPE I history_flag TYPE abap_bool,
+      display_cart_table IMPORTING history_flag TYPE abap_bool,
+      display_cart_with_names IMPORTING cart_instance type Cart_struct product_instance type Product.
 
-  private section.
-    methods: delete_itemby_customer_id importing customer_id type i,
-      display_cart importing instance type Cart_struct,
-      get_customer_name importing customer_id type i returning value(name) type string.
+  PRIVATE SECTION.
+    METHODS: flag_item_by_customer_id IMPORTING customer_id TYPE I,
+      display_cart IMPORTING instance TYPE Cart_struct,
+      get_customer_name IMPORTING customer_id TYPE I returning VALUE(name) TYPE string.
+ENDCLASS.
 
-
-
-endclass.
-
-Class Cart implementation.
+CLASS Cart IMPLEMENTATION.
   "********************************************************************************
   "* Private Method: get_customer_name
   "* Purpose: Getting Customer name
   "********************************************************************************
-  method get_customer_name.
-    READ TABLE Customer into customer_instance with key customer_id = customer_id.
-    if sy-subrc = 0.
+  METHOD get_customer_name.
+    READ TABLE Customer INTO customer_instance WITH KEY customer_id = customer_id.
+    IF sy-subrc = 0.
       name = customer_instance-name.
-    endif.
-  endmethod.
+    ENDIF.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: add_item
   "* Purpose: Add item to the cart
   "********************************************************************************
-  method add_item.
-    READ table Customer into customer_instance with key customer_id = customer_id.
-    if sy-subrc = 0.
-      READ table Inventory into product_instance with key product_id = product_id.
-      if sy-subrc = 0.
-        cart_instance = value #( cart_id = cart_id customer_id = customer_id product_id = product_id history_flag = history_flag ).
-        insert cart_instance into table Customer_cart.
+  METHOD add_item.
+    READ TABLE Customer INTO customer_instance WITH KEY customer_id = customer_id.
+    IF sy-subrc = 0.
+      READ TABLE Inventory INTO product_instance WITH KEY product_id = product_id.
+      IF sy-subrc = 0.
+        cart_instance = VALUE #( cart_id = cart_id customer_id = customer_id product_id = product_id history_flag = history_flag ).
+        INSERT cart_instance INTO TABLE Customer_cart.
         cart_id_counter = cart_id_counter + 1.
-      else.
-        write:/ 'Product does not exists!' color 6.
-      endif.
-    else.
-      write:/ 'Customer does not exists!' color 6.
-    endif.
-  endmethod.
+      ELSE.
+        WRITE:/ 'Product does not exists!' COLOR 6.
+      ENDIF.
+    ELSE.
+      WRITE:/ 'Customer does not exists!' COLOR 6.
+    ENDIF.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: update_item
   "* Purpose: Update item to the cart
   "********************************************************************************
-  method update_item.
-    DATA(title) = 'UPDATE Customer_cart set ... where id = ' && cart_id.
-    write:/ title color 2.
-    Read table Customer_cart into cart_instance with key cart_id = cart_id.
-    if sy-subrc = 0.
-      READ table Customer into customer_instance with key customer_id = customer_id.
-      if sy-subrc = 0.
-        READ table Inventory into product_instance with key product_id = product_id.
-        if sy-subrc = 0.
-          write:/'Customer cart before editing:'.
+  METHOD update_item.
+    DATA(TITLE) = 'UPDATE Customer_cart set ... where id = ' && cart_id.
+    WRITE:/ TITLE COLOR 2.
+    READ TABLE Customer_cart INTO cart_instance WITH KEY cart_id = cart_id.
+    IF sy-subrc = 0.
+      READ TABLE Customer INTO customer_instance WITH KEY customer_id = customer_id.
+      IF sy-subrc = 0.
+        READ TABLE Inventory INTO product_instance WITH KEY product_id = product_id.
+        IF sy-subrc = 0.
+          WRITE:/'Customer cart before editing:'.
           display_cart( instance = cart_instance ).
           cart_instance-customer_id = customer_id.
           cart_instance-product_id = product_id.
           cart_instance-history_flag = history_flag.
-          write:/'Customer cart after editing:'.
+          WRITE:/'Customer cart after editing:'.
           display_cart( instance = cart_instance ).
-        else.
-          write:/ 'You cant update this customer. The product_id : ' && product_id && ' does not exists!' color 6.
-        endif.
-      else.
-        write:/ 'You cant update this customer. The customer_id : ' && customer_id && ' does not exists!' color 6.
-      endif.
-    else.
-      write:/ 'No item with the Id: ' && cart_id && ' exists!'.
-    endif.
-    uline.
-  endmethod.
+        ELSE.
+          WRITE:/ 'You cant update this customer. The product_id : ' && product_id && ' does not exists!' COLOR 6.
+        ENDIF.
+      ELSE.
+        WRITE:/ 'You cant update this customer. The customer_id : ' && customer_id && ' does not exists!' COLOR 6.
+      ENDIF.
+    ELSE.
+      WRITE:/ 'No item with the Id: ' && cart_id && ' exists!'.
+    ENDIF.
+    ULINE.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: delete_item
   "* Purpose: Delete item from the cart by its id
   "********************************************************************************
-  method delete_item.
-    DATA(title) = 'DELETE 1 form Customer_cart where id = ' && id.
-    write:/ title color 2.
-    Read table Customer_cart into cart_instance with key cart_id = id.
-    if sy-subrc = 0.
-      write:/ 'Found one customer:'.
+  METHOD delete_item.
+    DATA(TITLE) = 'DELETE 1 form Customer_cart where id = ' && ID.
+    WRITE:/ TITLE COLOR 2.
+    READ TABLE Customer_cart INTO cart_instance WITH KEY cart_id = ID.
+    IF sy-subrc = 0.
+      WRITE:/ 'Found one customer:'.
       display_cart( instance = cart_instance ).
-      DELETE Customer_cart where cart_id = id.
-    else.
-      write:/ 'No Cusomer Cart exists with ID ' && id.
-    endif.
-    uline.
-  endmethod.
+      DELETE Customer_cart WHERE cart_id = ID.
+    ELSE.
+      WRITE:/ 'No Cusomer Cart exists with ID ' && ID.
+    ENDIF.
+    ULINE.
+  ENDMETHOD.
   "********************************************************************************
   "* Private Method: delete_item
   "* Purpose: Delete item from the cart by its customer id
   "********************************************************************************
-  method delete_itemby_customer_id.
-    DATA(title) = 'DELETE 1 form Customer_cart where customer_id = ' && customer_id.
-    write:/ title color 2.
-    Loop at Customer_cart assigning <fs_cart_instance> where customer_id = customer_id.
+  METHOD flag_item_by_customer_id.
+    DATA(TITLE) = 'Update Customer_cart set history_flag = true where customer_id = ' && customer_id.
+    WRITE:/ TITLE COLOR 2.
+    LOOP AT Customer_cart ASSIGNING <fs_cart_instance> WHERE customer_id = customer_id.
       <fs_cart_instance>-history_flag = abap_true.
-    endloop.
-  endmethod.
+    ENDLOOP.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: sort_by_customer_id
   "* Purpose: Sort by customer id
   "********************************************************************************
-  method sort_by_customer_id.
-    DATA(title) = 'SELECT * form Customer_cart SORT by customer_id'.
-    write: title color 2.
-    SORT Customer_cart by customer_id.
+  METHOD sort_by_customer_id.
+    DATA(TITLE) = 'SELECT * form Customer_cart SORT by customer_id'.
+    WRITE: TITLE COLOR 2.
+    SORT Customer_cart BY customer_id.
     display_cart_table( no_historization ).
-  endmethod.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: sort_by_product_id
   "* Purpose: Sort by product id
   "********************************************************************************
-  method sort_by_product_id.
-    DATA(title) = 'SELECT * form Customer_cart SORT by product_id'.
-    write: title color 2.
-    SORT Customer_cart by product_id.
+  METHOD sort_by_product_id.
+    DATA(TITLE) = 'SELECT * form Customer_cart SORT by product_id'.
+    WRITE: TITLE COLOR 2.
+    SORT Customer_cart BY product_id.
     display_cart_table( no_historization ).
-  endmethod.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: display_customer_cart
   "* Purpose: Find all product for certain customer
   "********************************************************************************
-  method display_customer_cart.
-    DATA(title) = 'SELECT * form Customer_cart where customer_id = ' && customer_id.
-    write: title color 2.
-    Data total_price type p length 10 decimals 2.
-    loop at Customer_cart into cart_instance where customer_id = customer_id and history_flag <> abap_true.
-      display_cart( cart_instance ).
-      READ table Inventory into product_instance with key product_id = cart_instance-product_id.
-      if sy-subrc = 0.
+  METHOD display_customer_cart.
+    DATA(TITLE) = 'SELECT * form Customer_cart where customer_id = ' && customer_id.
+    WRITE: TITLE COLOR 2.
+    DATA total_price TYPE p length 10 DECIMALS 2.
+    LOOP AT Customer_cart INTO cart_instance WHERE customer_id = customer_id AND history_flag <> abap_true.
+      READ TABLE Inventory INTO product_instance WITH KEY product_id = cart_instance-product_id.
+      IF sy-subrc = 0.
+        display_cart_with_names( cart_instance = cart_instance product_instance = product_instance ).
         total_price = total_price + product_instance-price.
-      endif.
-    endloop.
-    Data(total_in_string) = '=> Total reconds:' && total_price.
-    write: total_in_string color 5.
-    uline.
-  endmethod.
+      ENDIF.
+    ENDLOOP.
+    DATA(total_in_string) = '=> Total reconds:' && total_price.
+    WRITE: total_in_string COLOR 5.
+    ULINE.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: display_product_cart
   "* Purpose: Find all customer for certain product
   "********************************************************************************
-  method display_product_cart.
-    DATA(title) = 'SELECT * form Customer_cart where product_id = ' && product_id.
-    write:/ title color 2.
-    loop at Customer_cart into cart_instance where product_id = product_id and history_flag <> abap_true.
-      display_cart( cart_instance ).
-    endloop.
-    uline.
-  endmethod.
+  METHOD display_product_cart.
+    DATA(TITLE) = 'SELECT * form Customer_cart where product_id = ' && product_id.
+    WRITE:/ TITLE COLOR 2.
+    LOOP AT Customer_cart INTO cart_instance WHERE product_id = product_id AND history_flag <> abap_true.
+      READ TABLE Inventory INTO product_instance WITH KEY product_id = cart_instance-product_id.
+      IF sy-subrc = 0.
+        display_cart_with_names( cart_instance = cart_instance product_instance = product_instance ).
+      ENDIF.
+    ENDLOOP.
+    ULINE.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: checkout
   "* Purpose: Checkout for a certain customer
   "********************************************************************************
-  method checkout.
-    READ TABLE Customer into customer_instance with key customer_id = customer_id.
-    if sy-subrc = 0.
-      DATA(title) = 'Checkout for the user = ' && customer_instance-name.
-      write: title color 2.
-      write:/ 'Checkout ... List of the product that you want to buy:'.
+  METHOD checkout.
+    READ TABLE Customer INTO customer_instance WITH KEY customer_id = customer_id.
+    IF sy-subrc = 0.
+      DATA(TITLE) = 'Checkout for the user = ' && customer_instance-name.
+      WRITE: TITLE COLOR 2.
+      WRITE:/ 'Checkout ... List of the product that you want to buy:'.
       display_customer_cart( customer_id ).
-    else.
-      write:/ 'No Cart exists for the user with the id of:' && customer_id.
-    endif.
-    uline.
-  endmethod.
+    ELSE.
+      WRITE:/ 'No Cart exists for the user with the id of:' && customer_id.
+    ENDIF.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: purchase
   "* Purpose: Purchase after checking out for a certain customer
   "********************************************************************************
-  method purchase.
-    READ TABLE Customer into customer_instance with key customer_id = customer_id.
-    if sy-subrc = 0.
-      DATA(title) = 'Purchase for the user = ' && customer_instance-name.
-      write:/ title color 2.
-      write:/ 'Purchasing ... ',/ 'Thank your for buying from us. An email has ben send to your email address :' && customer_instance-email.
-      loop at Customer_cart into cart_instance where customer_id = customer_id and history_flag <> abap_true.
-        delete_itemby_customer_id( customer_id ).
-      endloop.
-    else.
-      write:/ 'No Cart exists for the user with the id of:' && customer_id.
-    endif.
-    uline.
-  endmethod.
+  METHOD purchase.
+    READ TABLE Customer INTO customer_instance WITH KEY customer_id = customer_id.
+    IF sy-subrc = 0.
+      DATA(TITLE) = 'Purchase for the user = ' && customer_instance-name.
+      WRITE:/ TITLE COLOR 2.
+      WRITE:/ 'Purchasing ... ',/ 'Thank your for buying from us. An email has ben send to your email address :' && customer_instance-email.
+      LOOP AT Customer_cart INTO cart_instance WHERE customer_id = customer_id AND history_flag <> abap_true.
+        flag_item_by_customer_id( customer_id ).
+      ENDLOOP.
+    ELSE.
+      WRITE:/ 'No Cart exists for the user with the id of:' && customer_id.
+    ENDIF.
+    ULINE.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: history
   "* Purpose: This method enable us to view the history of the purchased items for a certain customer
   "********************************************************************************
-  method history.
+  METHOD history.
     DATA(name) = get_customer_name( customer_id ).
-    Data total_price type p length 10 decimals 2.
-    write:/ '------------------------------------------Purchased item for :' && name && '----------------------------------------------------------------------------------------------' color 2.
-    WRITE: /       |ID    |,  15 |Product ID            |, 30 |Product Name            |, 60 |Product Price            |..
-    write:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
-    Loop AT Customer_cart into cart_instance where customer_id = customer_id and history_flag = history_flag.
-      READ table Inventory into product_instance with key product_id = cart_instance-product_id.
-      if sy-subrc = 0.
+    DATA total_price TYPE p length 10 DECIMALS 2.
+    WRITE:/ '------------------------------------------Purchased item for :' && name && '----------------------------------------------------------------------------------------------' COLOR 2.
+    WRITE: /       |ID    |,  15 |Product ID            |, 30 |Product Name            |, 70 |Product Price            |..
+    WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
+    LOOP AT Customer_cart INTO cart_instance WHERE customer_id = customer_id AND history_flag = history_flag.
+      READ TABLE Inventory INTO product_instance WITH KEY product_id = cart_instance-product_id.
+      IF sy-subrc = 0.
         WRITE: / |{ cart_instance-cart_id WIDTH = 15 }| COLOR 4,
-      15 |{ cart_instance-product_id WIDTH = 20 }| COLOR 4,
-      30 |{ product_instance-name  WIDTH = 40 }| COLOR 4,
-      60 |{ product_instance-price  WIDTH = 20 }| COLOR 4.
+        15 |{ cart_instance-product_id WIDTH = 20 }| COLOR 4,
+        30 |{ product_instance-name  WIDTH = 40 }| COLOR 4,
+        70 |{ product_instance-price  WIDTH = 20 }| COLOR 4.
         total_price = total_price + product_instance-price.
-        write:/.
-      endif.
-    endloop.
-    Data(total_in_string) = '=> Total reconds:' && total_price.
-    write: total_in_string color 5.
-  endmethod.
+        WRITE:/.
+      ENDIF.
+    ENDLOOP.
+    DATA(total_in_string) = '=> Total reconds:' && total_price.
+    WRITE: total_in_string COLOR 5.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: display_cart_table
   "* Purpose: Display Customer Cart table
   "********************************************************************************
-  method display_cart_table.
-    write:/ '------------------------------------------Customer Cart Table----------------------------------------------------------------------------------------------' color 2.
-    WRITE: /       |ID    |, 15 |Customer ID           |, 35 |Product ID            |.
-    write:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
-
-    Loop AT Customer_cart into cart_instance where history_flag = no_historization.
+  METHOD display_cart_table.
+    WRITE:/ '------------------------------------------Customer Cart Table----------------------------------------------------------------------------------------------' COLOR 2.
+    WRITE: /       |ID    |, 15 |Customer ID           |, 35 |Product ID            |, 45 |Historization       |.
+    WRITE:/ '-----------------------------------------------------------------------------------------------------------------------------------------------------------'.
+    Data counter type i value 0.
+    LOOP AT Customer_cart INTO cart_instance WHERE history_flag = history_flag.
       display_cart( instance = cart_instance ).
-    endloop.
-    Data(total_records) =  lines( Customer_cart ).
-    Data(total_in_string) = '=> Total price :' && total_records.
-    write:/ total_in_string color 5.
-    uline.
-  endmethod.
+      counter = counter + 1.
+    ENDLOOP.
+    DATA(total_in_string) = '=> Total items :' && counter.
+    WRITE:/ total_in_string COLOR 5.
+    ULINE.
+  ENDMETHOD.
   "********************************************************************************
   "* Private Method: display_cart
   "* Purpose: Display single Customer Cart
   "********************************************************************************
-  method display_cart.
-    WRITE: / |{ instance-cart_id WIDTH = 15 }| COLOR 4,
-           15 |{ instance-customer_id WIDTH = 45 }| COLOR 4,
-           35 |{ instance-product_id  WIDTH = 40 }| COLOR 4.
-    write:/.
-  endmethod.
-endclass.
+  METHOD display_cart.
+    data: is_history type string,
+          color1     TYPE sy-linct,
+          color2     TYPE sy-linct.
+
+    color1 = 4.
+    color2 = 4.
+    if instance-history_flag = abap_true.
+      is_history = 'Flagged for historization'.
+      color2 = 6.
+    else.
+      is_history = 'No flag'.
+    endif.
+    WRITE: / |{ instance-cart_id WIDTH = 15 }| COLOR = color1,
+    15 |{ instance-customer_id WIDTH = 45 }| COLOR = color1,
+    35 |{ instance-product_id  WIDTH = 40 }| COLOR = color1,
+    45 |{ is_history  WIDTH = 30 }| COLOR = color2.
+    WRITE:/.
+  ENDMETHOD.
+  "********************************************************************************
+  "* Private Method: display_cart_with_names
+  "* Purpose: Display single Customer Cart full details
+  "********************************************************************************
+  METHOD display_cart_with_names.
+    WRITE: / |{ cart_instance-cart_id WIDTH = 15 }| COLOR 4,
+    15 |{ cart_instance-customer_id WIDTH = 45 }| COLOR 4,
+    35 |{ cart_instance-product_id  WIDTH = 40 }| COLOR 4,
+    45 |{ product_instance-name  WIDTH = 40 }| COLOR 4,
+    70 |{ product_instance-price  WIDTH = 40 }| COLOR 4.
+    WRITE:/.
+  ENDMETHOD.
+ENDCLASS.

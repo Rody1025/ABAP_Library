@@ -64,210 +64,210 @@
 
 REPORT z_13_oop_advance.
 
-Include  z_customer.
+INCLUDE  z_customer.
 "********************************************************************************
 "* Class: Store
 "* Purpose: DEFINITION for Store Class
 "********************************************************************************
 CLASS Store DEFINITION.
   PUBLIC SECTION.
-    Class-DATA: product_id_counter type i value 1.
+    CLASS-DATA: product_id_counter TYPE I VALUE 1.
 
     METHODS:
     add_product IMPORTING ID TYPE I name TYPE string desc TYPE string
-                          category TYPE string price TYPE p is_available TYPE abap_bool,
+      category TYPE string price TYPE p is_available TYPE abap_bool,
     find_by_category IMPORTING category TYPE string,
     find_by_keyword IMPORTING keyword TYPE string,
     find_by_price_range IMPORTING start TYPE p END TYPE p,
-    update_availability_by_id importing id type i,
-    update_availability_by_keyword importing keyword type string,
+    update_availability_by_id IMPORTING ID TYPE I,
+    update_availability_by_keyword IMPORTING keyword TYPE string,
     delete_by_id IMPORTING ID TYPE I,
-    sort_by_price,
-    sort_by_id,
-    display_inventory.
+      sort_by_price,
+      sort_by_id,
+      display_inventory.
   PRIVATE SECTION.
-    methods: check_if_exists importing id type i RETURNING VALUE(is_exists) TYPE abap_bool,
-      display_product importing instance type Product.
+    METHODS: check_if_exists IMPORTING ID TYPE I RETURNING VALUE(is_exists) TYPE abap_bool,
+      display_product IMPORTING instance TYPE Product.
 ENDCLASS.
 "********************************************************************************
 "* Class: Store
 "* Purpose: IMPLEMENTATION for Store Inventory
 "********************************************************************************
-CLASS store implementation.
+CLASS store IMPLEMENTATION.
   "********************************************************************************
   "* Method: add_product
   "* Purpose: Add product to the Inventory
   "********************************************************************************
   METHOD add_product.
-    data(exists) = check_if_exists( id = ID ).
-    Data(totalRecords) =  lines( Inventory ).
+    DATA(exists) = check_if_exists( ID = ID ).
+    DATA(totalRecords) =  LINES( Inventory ).
     product_instance = VALUE #( product_id  = ID name = name desc = desc category = category
-                                    price = price  is_available = is_available ).
-    if totalRecords > 1.
-      if exists = abap_true.
-        write:/ 'A similar product with the same ID already exists'.
-      else.
+    price = price  is_available = is_available ).
+    IF totalRecords > 1.
+      IF exists = abap_true.
+        WRITE:/ 'A similar product with the same ID already exists'.
+      ELSE.
         INSERT product_instance INTO TABLE Inventory.
         product_id_counter = product_id_counter + 1.
-      endif.
-    else.
+      ENDIF.
+    ELSE.
       INSERT product_instance INTO TABLE Inventory.
       product_id_counter = product_id_counter + 1.
-    endif.
+    ENDIF.
   ENDMETHOD.
   "********************************************************************************
   "* Method: find_by_category
   "* Purpose: Find product by category
   "********************************************************************************
-  method find_by_category.
-    DATA(title) = 'SELECT * from Inventory where category = ' && category.
-    write: title color 2.
-    loop at Inventory into product_instance where category = category.
+  METHOD find_by_category.
+    DATA(TITLE) = 'SELECT * from Inventory where category = ' && category.
+    WRITE: TITLE COLOR 2.
+    LOOP AT Inventory INTO product_instance WHERE category = category.
       display_product( instance = product_instance ).
-    endloop.
-  endmethod.
+    ENDLOOP.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: find_by_keyword
   "* Purpose: Find product by keyword
   "********************************************************************************
-  method find_by_keyword.
-    DATA(title) = 'SELECT * from Inventory where name LIKE : ' && keyword && ' or desc LIKE : ' && keyword.
-    write: title color 2.
-    loop at Inventory into product_instance where name CS keyword or desc CS keyword.
+  METHOD find_by_keyword.
+    DATA(TITLE) = 'SELECT * from Inventory where name LIKE : ' && keyword && ' or desc LIKE : ' && keyword.
+    WRITE: TITLE COLOR 2.
+    LOOP AT Inventory INTO product_instance WHERE name CS keyword OR desc CS keyword.
       display_product( instance = product_instance ).
-    endloop.
-  endmethod.
+    ENDLOOP.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: find_by_price_range
   "* Purpose: Find products by a price range
   "********************************************************************************
-  method find_by_price_range.
-    DATA(title) = 'SELECT * from Inventory where name price in > ' && start && ' and price < ' && end.
-    write: title color 2.
-    loop at Inventory into product_instance where price between start and end.
+  METHOD find_by_price_range.
+    DATA(TITLE) = 'SELECT * from Inventory where name price in > ' && start && ' and price < ' && END.
+    WRITE: TITLE COLOR 2.
+    LOOP AT Inventory INTO product_instance WHERE price BETWEEN start AND END.
       display_product( instance = product_instance ).
-    endloop.
-  endmethod.
+    ENDLOOP.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: update_availability_by_id
   "* Purpose: Update the availability of a product by its id
   "********************************************************************************
-  method update_availability_by_id.
-    DATA(title) = 'UPDATE Inventory set is_available = true where id =' && id.
-    write: title color 2.
-    FIELD-symbols: <fs_instance_product> type Product.
-    loop at Inventory assigning <fs_instance_product> where product_id = id.
+  METHOD update_availability_by_id.
+    DATA(TITLE) = 'UPDATE Inventory set is_available = true where id =' && ID.
+    WRITE: TITLE COLOR 2.
+    FIELD-symbols: <fs_instance_product> TYPE Product.
+    LOOP AT Inventory ASSIGNING <fs_instance_product> WHERE product_id = ID.
       <fs_instance_product>-is_available = abap_true.
       display_product( instance = <fs_instance_product> ).
-    endloop.
-  endmethod.
+    ENDLOOP.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: update_availability_by_keyword
   "* Purpose: Update the availability of a product by keyword
   "********************************************************************************
-  method update_availability_by_keyword.
-    DATA(title) = 'UPDATE Inventory set is_available = true where name LIKE :' && keyword.
-    write: title color 2.
-    FIELD-symbols: <fs_instance_product> type Product.
-    loop at Inventory assigning <fs_instance_product> where name CS keyword.
+  METHOD update_availability_by_keyword.
+    DATA(TITLE) = 'UPDATE Inventory set is_available = true where name LIKE :' && keyword.
+    WRITE: TITLE COLOR 2.
+    FIELD-symbols: <fs_instance_product> TYPE Product.
+    LOOP AT Inventory ASSIGNING <fs_instance_product> WHERE name CS keyword.
       <fs_instance_product>-is_available = abap_true.
       display_product( instance = <fs_instance_product> ).
-    endloop.
-  endmethod.
+    ENDLOOP.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: delete_by_id
   "* Purpose: Delete product form the Inventory
   "********************************************************************************
-  method delete_by_id.
-    DATA(title) = 'Delete 1 from Inventory where product_id = ' && id.
-    write: title color 2.
-    write:/ 'Reading the table ...'.
-    Read table inventory into product_instance with key product_id = id.
-    if sy-subrc = 0.
-      write:/ 'Found one item:'.
+  METHOD delete_by_id.
+    DATA(TITLE) = 'Delete 1 from Inventory where product_id = ' && ID.
+    WRITE: TITLE COLOR 2.
+    WRITE:/ 'Reading the table ...'.
+    READ TABLE inventory INTO product_instance WITH KEY product_id = ID.
+    IF sy-subrc = 0.
+      WRITE:/ 'Found one item:'.
       display_product( instance = product_instance ).
-      DELETE inventory where product_id = id.
-    endif.
-  endmethod.
+      DELETE inventory WHERE product_id = ID.
+    ENDIF.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: delete_by_id
   "* Purpose: Sort by price
   "********************************************************************************
-  method sort_by_price.
-    DATA(title) = 'SELECT * from Inventory sort by price'.
-    write: title color 2.
-    SORT Inventory by price.
+  METHOD sort_by_price.
+    DATA(TITLE) = 'SELECT * from Inventory sort by price'.
+    WRITE: TITLE COLOR 2.
+    SORT Inventory BY price.
     display_inventory(  ).
-  endmethod.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: sort_by_id
   "* Purpose: Sort by id
   "********************************************************************************
-  method sort_by_id.
-    DATA(title) = 'SELECT * from Inventory sort by product_id'.
-    write: title color 2.
-    SORT Inventory by product_id.
+  METHOD sort_by_id.
+    DATA(TITLE) = 'SELECT * from Inventory sort by product_id'.
+    WRITE: TITLE COLOR 2.
+    SORT Inventory BY product_id.
     display_inventory(  ).
-  endmethod.
+  ENDMETHOD.
   "********************************************************************************
   "* Method: display_inventory
   "* Purpose: Display the Inventory table in a structured manners
   "********************************************************************************
-  method display_inventory.
-    write:/ '------------------------------------------Loan Table--------------------------------------------------------------------------------------------------'.
+  METHOD display_inventory.
+    WRITE:/ '------------------------------------------Loan Table--------------------------------------------------------------------------------------------------'.
     WRITE: /       |Product ID    |, 15 |Name          |, 60 |Category           |,
-                80 |Price         |, 90 |Availability     |, 105 |Description     |.
-    write:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
+    80 |Price         |, 90 |Availability     |, 105 |Description     |.
+    WRITE:/ '-------------------------------------------------------------------------------------------------------------------------------------------------------'.
 
-    Loop AT Inventory into product_instance.
+    LOOP AT Inventory INTO product_instance.
       display_product( instance = product_instance ).
-    endloop.
-    Data(total_records) =  lines( Inventory ).
-    Data(total_in_string) = '=> Total reconds:' && total_records.
-    write: total_in_string color 5.
-    uline.
-  endmethod.
+    ENDLOOP.
+    DATA(total_records) =  LINES( Inventory ).
+    DATA(total_in_string) = '=> Total reconds:' && total_records.
+    WRITE: total_in_string COLOR 5.
+    ULINE.
+  ENDMETHOD.
 
   "********************************************************************************
   "* Private Method: display_product
   "* Purpose: Display the coloring to avoid code duplication
   "********************************************************************************
-  method  display_product.
-    DATA: is_available type string,
+  METHOD  display_product.
+    DATA: is_available TYPE string,
           color1       TYPE sy-linct,
           color2       TYPE sy-linct.
 
-    if instance-is_available = abap_true.
+    IF instance-is_available = abap_true.
       color1 = 4.
       color2 = 4.
       is_available = 'Available'.
-    else.
+    ELSE.
       color1 = sy-linct.
       color2 = 6.
       is_available = 'Not Available'.
-    endif.
+    ENDIF.
     WRITE: / |{ instance-product_id WIDTH = 15 }| COLOR = color1,
-           15 |{ instance-name WIDTH = 45 }| COLOR = color1,
-           60 |{ instance-category  WIDTH = 40 }| COLOR = color1,
-           80 |{ instance-price WIDTH = 20 }| COLOR = color1,
-           90 |{ is_available WIDTH = 20  }| COLOR = color2,
-           105 |{ instance-desc WIDTH = 70  }| COLOR = color1.
-    write:/.
-  endmethod.
+    15 |{ instance-name WIDTH = 45 }| COLOR = color1,
+    60 |{ instance-category  WIDTH = 40 }| COLOR = color1,
+    80 |{ instance-price WIDTH = 20 }| COLOR = color1,
+    90 |{ is_available WIDTH = 20  }| COLOR = color2,
+    105 |{ instance-desc WIDTH = 70  }| COLOR = color1.
+    WRITE:/.
+  ENDMETHOD.
   "********************************************************************************
   "* Private Method: check_if_exists
   "* Purpose: check if the item exists, this is based on its ID
   "********************************************************************************
   METHOD check_if_exists.
-    Read table inventory into product_instance with key product_id = id.
+    READ TABLE inventory INTO product_instance WITH KEY product_id = ID.
     is_exists = sy-subrc = 0.
-  endmethod.
+  ENDMETHOD.
 ENDCLASS.
 
 
 START-OF-SELECTION.
   DATA: gamestore TYPE REF TO Store.
-  gamestore = New Store(  ).
+  gamestore = NEW Store(  ).
   gamestore->add_product( ID = Store=>product_id_counter name = 'PlayStation 5' desc = 'The latest gaming console from Sony'
   category = 'Consoles' price = '499.99' is_available = abap_false ).
   gamestore->add_product( ID = Store=>product_id_counter name = 'Xbox Series X' desc = 'The latest gaming console from Microsoft'
@@ -296,65 +296,66 @@ START-OF-SELECTION.
   gamestore->display_inventory(  ).
   gamestore->find_by_category( category = 'Games' ).
   gamestore->find_by_keyword( keyword = 'PlayStation' ).
-  gamestore->find_by_price_range( start = '50.10' end = '200.20' ).
+  gamestore->find_by_price_range( start = '50.10' END = '200.20' ).
 
-  gamestore->update_availability_by_id( id = 11 ).
+  gamestore->update_availability_by_id( ID = 11 ).
   gamestore->update_availability_by_keyword( keyword = 'PlayStation' ).
   gamestore->display_inventory(  ).
 
-  gamestore->delete_by_id( id = 12 ).
+  gamestore->delete_by_id( ID = 12 ).
 
   gamestore->sort_by_price(  ).
   gamestore->sort_by_id(  ).
 
   DATA: gamestore_customer TYPE REF TO User.
-  gamestore_customer = New User(  ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'John Smith' email = 'john.smith@example.com'
-                          password = 'P@ssw0rd' premium = abap_true flag = abap_false flag_comments = '' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'Alice Johnson' email = 'alice.johnson@example.com'
-                          password = 'abc123' premium = abap_false flag = abap_false flag_comments = '' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'Bob Davis' email = 'bob.davis@example.com'
-                          password = 'davis2022' premium = abap_false flag = abap_false flag_comments = '' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'Karen Williams' email = 'karen.williams@example.com'
-                          password = 'K@ren123' premium = abap_false flag = abap_true flag_comments = 'Provided incorrect billing address.' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'Mike Jones' email = 'mike.jones@example.com'
-                          password = 'jones456' premium = abap_false flag = abap_false flag_comments = '' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'Emily Lee' email = 'emily.lee@example.com'
-                          password = 'Elee2022' premium = abap_true flag = abap_false flag_comments = '' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'David Brown' email = 'david.brown@example.com'
-                          password = 'br0wnDav1d' premium = abap_false flag = abap_true flag_comments = 'Attempted to use a stolen credit card.' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'Julia Taylor' email = 'julia.taylor@example.com'
-                          password = 'Tayl0rJ2022' premium = abap_false flag = abap_false flag_comments = '' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'Kevin Miller' email = 'kevin.miller@example.com'
-                          password = 'M1ll3rKev1n' premium = abap_false flag = abap_false flag_comments = '' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'Olivia Green' email = 'olivia.green@example.com'
-                          password = 'gr33nOl1v1a' premium = abap_false flag = abap_true flag_comments = 'Provided fake contact information.' ).
-  gamestore_customer->add_customer( id = User=>customer_id_counter name = 'NA' email = 'NA@example.com'
-                          password = 'NAANNAAN' premium = abap_false flag = abap_true flag_comments = 'Flagged for deletion' ).
+  gamestore_customer = NEW User(  ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'John Smith' email = 'john.smith@example.com'
+  password = 'P@ssw0rd' premium = abap_true flag = abap_false flag_comments = '' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'Alice Johnson' email = 'alice.johnson@example.com'
+  password = 'abc123' premium = abap_false flag = abap_false flag_comments = '' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'Bob Davis' email = 'bob.davis@example.com'
+  password = 'davis2022' premium = abap_false flag = abap_false flag_comments = '' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'Karen Williams' email = 'karen.williams@example.com'
+  password = 'K@ren123' premium = abap_false flag = abap_true flag_comments = 'Provided incorrect billing address.' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'Mike Jones' email = 'mike.jones@example.com'
+  password = 'jones456' premium = abap_false flag = abap_false flag_comments = '' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'Emily Lee' email = 'emily.lee@example.com'
+  password = 'Elee2022' premium = abap_true flag = abap_false flag_comments = '' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'David Brown' email = 'david.brown@example.com'
+  password = 'br0wnDav1d' premium = abap_false flag = abap_true flag_comments = 'Attempted to use a stolen credit card.' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'Julia Taylor' email = 'julia.taylor@example.com'
+  password = 'Tayl0rJ2022' premium = abap_false flag = abap_false flag_comments = '' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'Kevin Miller' email = 'kevin.miller@example.com'
+  password = 'M1ll3rKev1n' premium = abap_false flag = abap_false flag_comments = '' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'Olivia Green' email = 'olivia.green@example.com'
+  password = 'gr33nOl1v1a' premium = abap_false flag = abap_true flag_comments = 'Provided fake contact information.' ).
+  gamestore_customer->add_customer( ID = User=>customer_id_counter name = 'NA' email = 'NA@example.com'
+  password = 'NAANNAAN' premium = abap_false flag = abap_true flag_comments = 'Flagged for deletion' ).
 
   gamestore_customer->display_customer_table(  ).
-  gamestore_customer->update_customer( id = 6 name = 'Emily Lee' email = 'emily.lee@example.com'
-   password = 'Elee2022' premium = abap_false flag = abap_true flag_comments = 'Removed from Permium, cause of suspicious activity' ).
+  gamestore_customer->update_customer( ID = 6 name = 'Emily Lee' email = 'emily.lee@example.com'
+  password = 'Elee2022' premium = abap_false flag = abap_true flag_comments = 'Removed from Permium, cause of suspicious activity' ).
   gamestore_customer->delete_cusomter( 11 ).
   gamestore_customer->display_customer_table(  ).
   gamestore_customer->find_all_flagged(  ).
   gamestore_customer->find_users_by_name( 'Lee' ).
 
   DATA: gamestore_customer_cart TYPE REF TO Cart.
-  gamestore_customer_cart = New Cart(  ).
+  gamestore_customer_cart = NEW Cart(  ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 1 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 2 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 3 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 2 product_id = 5 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 2 product_id = 6 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 3 product_id = 1 history_flag = abap_false ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 5 product_id = 10 history_flag = abap_false ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 6 product_id = 9 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 4 product_id = 4 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 6 product_id = 6 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 8 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 8 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 20 product_id = 8  history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 56  history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 50 product_id = 50 history_flag = abap_false ).
+  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 10 product_id = 10 history_flag = abap_false ).
 
   gamestore_customer_cart->display_cart_table( abap_false ).
   gamestore_customer_cart->update_item( cart_id = 1 customer_id = 50 product_id = 2 history_flag = abap_false ).
@@ -367,8 +368,40 @@ START-OF-SELECTION.
   gamestore_customer_cart->display_customer_cart( 1 ).
   gamestore_customer_cart->display_product_cart( 8 ).
 
-  gamestore_customer_cart->checkout( 1 ).
-  gamestore_customer_cart->purchase( 1 ).
   gamestore_customer_cart->display_cart_table( abap_false ).
+  gamestore_customer_cart->checkout( 1 ). gamestore_customer_cart->purchase( 1 ).
+  gamestore_customer_cart->checkout( 2 ). gamestore_customer_cart->purchase( 2 ).
+  gamestore_customer_cart->checkout( 3 ). gamestore_customer_cart->purchase( 3 ).
+  gamestore_customer_cart->checkout( 4 ). gamestore_customer_cart->purchase( 4 ).
+  gamestore_customer_cart->checkout( 8 ). gamestore_customer_cart->purchase( 8 ).
+  gamestore_customer_cart->display_cart_table( abap_false ).
+  write:/ 'Display all the historized items' color 1.
+  gamestore_customer_cart->display_cart_table( abap_true ).
 
   gamestore_customer_cart->history( customer_id = 1 history_flag = abap_true ).
+  gamestore_customer_cart->history( customer_id = 2 history_flag = abap_true ).
+  gamestore_customer_cart->history( customer_id = 3 history_flag = abap_true ).
+
+
+  DATA: gamestore_customer_review TYPE REF TO Review.
+  gamestore_customer_review = NEW Review(  ).
+  gamestore_customer_review->add_review( review_id = Review=>review_id_counter
+  customer_id = 1 product_id = 2 review = 'Best item!' ).
+  gamestore_customer_review->add_review( review_id = Review=>review_id_counter
+  customer_id = 1 product_id = 3 review = 'I love this product! It exceeded my expectations.' ).
+  gamestore_customer_review->add_review( review_id = Review=>review_id_counter
+  customer_id = 2 product_id = 5 review = 'This is a great product! It works very well and is easy to use.' ).
+  gamestore_customer_review->add_review( review_id = Review=>review_id_counter
+  customer_id = 2 product_id = 6 review = 'I''m very happy with this product! It''s exactly what I was looking for.' ).
+  gamestore_customer_review->add_review( review_id = Review=>review_id_counter
+  customer_id = 3 product_id = 1 review = 'This product is amazing! It''s changed the way I work for the better.' ).
+  gamestore_customer_review->add_review( review_id = Review=>review_id_counter
+  customer_id = 4 product_id = 4 review = 'I''m impressed with this product! It''s well-designed and very versatile.' ).
+  gamestore_customer_review->add_review( review_id = Review=>review_id_counter
+  customer_id = 8 product_id = 8 review = 'This product is excellent! It''s helped me save time and increase my productivity.' ).
+  gamestore_customer_review->add_review( review_id = Review=>review_id_counter
+  customer_id = 10 product_id = 10 review = 'This product is excellent! It''s helped me save time and increase my productivity.' ).
+
+  gamestore_customer_review->display_review_table(  ).
+  gamestore_customer_review->update_review( review_id = 7 review = 'This has been edited!' ).
+  gamestore_customer_review->delete_review( 8 ).
