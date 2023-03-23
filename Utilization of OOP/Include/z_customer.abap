@@ -8,6 +8,7 @@
 INCLUDE z_decleration.
 INCLUDE z_cart.
 INCLUDE z_review.
+Include z_store.
 
 CLASS User DEFINITION.
   PUBLIC SECTION.
