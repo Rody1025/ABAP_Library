@@ -34,7 +34,7 @@ CLASS Store DEFINITION.
       sort_by_price,
       sort_by_id,
       display_inventory,
-      generate_report, check_email_structure.
+      generate_report.
   PRIVATE SECTION.
     METHODS:
       display_product IMPORTING instance TYPE Product,
