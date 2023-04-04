@@ -8,18 +8,6 @@
 CLASS User DEFINITION inheriting from Operations.
   PUBLIC SECTION.
     CLASS-DATA: customer_id_counter TYPE I VALUE 1.
-    TYPES: BEGIN OF user_readable,
-             customer_id   TYPE I,
-             name          TYPE string,
-             email         TYPE string,
-             password      TYPE string,
-             premium       TYPE string,
-             flag          TYPE string,
-             flag_comments TYPE string,
-           END OF user_readable.
-
-    DATA: tmp_table          TYPE TABLE OF user_readable,
-          tmp_table_instance TYPE user_readable.
 
     METHODS:
       add_customer    IMPORTING
@@ -58,12 +46,8 @@ CLASS User DEFINITION inheriting from Operations.
     METHODS:
 
       display_single_row IMPORTING
-                            instance      type  User_struct
-                  returning value(result) type string,
-
-      make_table_readable IMPORTING
-                                    table      Like Customer
-                          returning VALUE(res) Like tmp_table.
+                                   instance      type  User_struct
+                         returning value(result) type string.
 ENDCLASS.
 "********************************************************************************
 "* Class: User
@@ -75,8 +59,21 @@ CLASS User IMPLEMENTATION.
   "* Purpose: Add customer
   "********************************************************************************
   METHOD add_customer.
-    customer_instance = VALUE #( customer_id = ID name = name email =
-    email password = password premium = premium flag = flag flag_comments = flag_comments ).
+    customer_instance = VALUE #( customer_id = ID
+                                 name = name
+                                 email = email password = password
+                                 premium = premium
+                                 premium_str = 'NA'
+                                 flag = flag
+                                 flag_str = 'NA'
+                                 flag_comments = flag_comments ).
+    if premium = abap_true.
+      customer_instance-premium_str = 'Premium'.
+    endif.
+    if flag = abap_true.
+      customer_instance-flag_str = 'Flagged!'.
+    endif.
+
     INSERT customer_instance INTO TABLE Customer.
     customer_id_counter = customer_id_counter + 1.
   ENDMETHOD.
@@ -89,8 +86,8 @@ CLASS User IMPLEMENTATION.
     APPEND LINES OF init_ALV_column( pos = 2 header = 'name' col_name = 'Name' len = 15 ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 3 header = 'email' col_name = 'Email' len = 25  ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 4 header = 'password' col_name = 'Password' len =  20 ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 5 header = 'premium' col_name = 'Premium' len = 9 ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 5 header = 'flag' col_name = 'Flag' len = 7 ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 5 header = 'premium_str' col_name = 'Premium' len = 9 ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 5 header = 'flag_str' col_name = 'Flag' len = 7 ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 6 header = 'flag_comments' col_name = 'Comments' len = 60 ) to col_header_table.
   endmethod.
   "********************************************************************************
@@ -104,10 +101,9 @@ CLASS User IMPLEMENTATION.
       APPEND LINES OF append_comment_pair( key = 'Date :' value = '' && date ) to comments_table.
       APPEND LINES OF append_comment_italic( 'Look at the table and check the item.' ) to comments_table.
       APPEND LINES OF append_comment_italic( 'After pressing ESC, we will process/manipulate the data.' ) to comments_table.
-
-      DATA(tmp_table) = make_table_readable( Customer ).
+      DATA(parameter_table) = Customer.
     else.
-      tmp_table = make_table_readable( table ).
+      parameter_table = table.
     endif.
 
     CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
@@ -116,7 +112,7 @@ CLASS User IMPLEMENTATION.
         i_callback_top_of_page = 'TOP_OF_PAGE'
         it_fieldcat            = col_header_table
       TABLES
-        t_outtab               = tmp_table.
+        t_outtab               = parameter_table.
     " Freeing the table, while the first element is kept.
     LOOP AT comments_table FROM 2 INTO DATA(ls_header).
       DELETE comments_table INDEX 2.
@@ -172,6 +168,8 @@ CLASS User IMPLEMENTATION.
     ELSE.
       APPEND LINES OF append_comment_italic( 'No Cusomer exists with ID ' && ID ) to comments_table.
     ENDIF.
+    APPEND LINES OF append_comment_italic( ' ' ) to comments_table.
+    APPEND LINES OF append_comment_italic( 'Table after processing' ) to comments_table.
     display_table( is_inital = abap_false table = Customer ).
   ENDMETHOD.
   "********************************************************************************
@@ -224,27 +222,4 @@ CLASS User IMPLEMENTATION.
     READ TABLE Customer INTO customer_instance WITH KEY customer_id = ID.
     is_exists = sy-subrc = 0.
   ENDMETHOD.
-  "********************************************************************************
-  "* Method: make_table_readable
-  "* Purpose: We change the abap_bool value to a string to read it as Premium or Flagged
-  "* instead of x or empty
-  "********************************************************************************
-  method make_table_readable.
-    LOOP AT table INTO customer_instance.
-      tmp_table_instance-customer_id = customer_instance-customer_id.
-      tmp_table_instance-name = customer_instance-name.
-      tmp_table_instance-email = customer_instance-email.
-      tmp_table_instance-password = customer_instance-password.
-      tmp_table_instance-flag_comments = customer_instance-flag_comments.
-      tmp_table_instance-premium = 'NA'.
-      tmp_table_instance-flag = 'NA'.
-      if customer_instance-premium = abap_true.
-        tmp_table_instance-premium = 'Premium'.
-      endif.
-      if customer_instance-flag = abap_true.
-        tmp_table_instance-flag = 'Flagged'.
-      endif.
-      append tmp_table_instance to res.
-    ENDLOOP.
-  endmethod.
 ENDCLASS.

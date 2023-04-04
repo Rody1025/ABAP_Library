@@ -21,12 +21,13 @@ CLASS Store DEFINITION inheriting from Operations.
     CLASS-DATA: product_id_counter TYPE I VALUE 1.
     METHODS:
       add_product IMPORTING
-                    ID           TYPE I
-                    name         TYPE string
-                    desc         TYPE string
-                    category     TYPE string
-                    price        TYPE p
-                    is_available TYPE abap_bool,
+                    ID               TYPE I
+                    name             TYPE string
+                    desc             TYPE string
+                    category         TYPE string
+                    price            TYPE p
+                    is_available     TYPE abap_bool
+                    is_available_str TYPE String default 'Available',
 
       find_by_keyword IMPORTING
                         keyword TYPE string,
@@ -52,15 +53,17 @@ CLASS Store DEFINITION inheriting from Operations.
   PRIVATE SECTION.
     DATA: col_header_table TYPE SLIS_T_FIELDCAT_ALV,
           column           TYPE SLIS_FIELDCAT_ALV.
+
+    DATA: go_alv       TYPE REF TO cl_salv_table,
+          gt_outtab    TYPE TABLE OF Product,
+          go_functions TYPE REF TO cl_salv_functions_list,
+          go_layout    TYPE REF TO cl_salv_layout,
+          gv_page_size TYPE i VALUE 10.
+
     METHODS:
-
       display_single_row IMPORTING
-                            instance      type  Product
-                  returning value(result) type string,
-
-      make_table_readable importing
-                                    table      like Inventory
-                          returning value(res) like tmp_table.
+                                   instance      type  Product
+                         returning value(result) type string.
 ENDCLASS.
 "********************************************************************************
 "* Class: Store
@@ -73,11 +76,20 @@ CLASS store IMPLEMENTATION.
   "********************************************************************************
   METHOD add_product.
     DATA(exists) = check_if_exist( ID = ID ).
-    product_instance = VALUE #( product_id  = ID name = name desc = desc category = category
-    price = price  is_available = is_available ).
+    product_instance = VALUE #( product_id  = ID
+                                name = name
+                                desc = desc
+                                category = category
+                                price = price
+                                is_available = is_available
+                                is_available_str = 'Available' ).
+    if is_available = abap_false.
+      product_instance-is_available_str = 'Not Available'.
+    endif.
+
     IF get_table_length( Inventory ) > 1.
       IF exists = abap_true.
-        APPEND LINES OF append_comment_italic( 'A similar product with the same ID already exists') to comments_table.
+        APPEND LINES OF append_comment_italic( 'A similar product with the same ID (' && ID &&  ') already exists') to comments_table.
       ELSE.
         INSERT product_instance INTO TABLE Inventory.
         product_id_counter = product_id_counter + 1.
@@ -96,7 +108,7 @@ CLASS store IMPLEMENTATION.
     APPEND LINES OF init_ALV_column( pos = 2 header = 'name' col_name = 'Name' len = 30 ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 3 header = 'category' col_name = 'Category' len = 10  ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 4 header = 'price' col_name = 'Price' len =  10 ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 5 header = 'is_available' col_name = 'Availability' len = 10 ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 5 header = 'is_available_str' col_name = 'Availability' len = 10 ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 6 header = 'desc' col_name = 'Description' len = 60 ) to col_header_table.
   endmethod.
   "********************************************************************************
@@ -110,9 +122,9 @@ CLASS store IMPLEMENTATION.
       APPEND LINES OF append_comment_pair( key = 'Date :' value = '' && date ) to comments_table.
       APPEND LINES OF append_comment_italic( 'Look at the table and check the item.' ) to comments_table.
       APPEND LINES OF append_comment_italic( 'After pressing ESC, we will process/manipulate the data.' ) to comments_table.
-      DATA(tmp_table) = make_table_readable( Inventory ).
+      DATA(paramter_table) =  Inventory.
     else.
-      tmp_table = make_table_readable( table ).
+      paramter_table =  table.
     endif.
 
     CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
@@ -121,7 +133,7 @@ CLASS store IMPLEMENTATION.
         i_callback_top_of_page = 'TOP_OF_PAGE'
         it_fieldcat            = col_header_table
       TABLES
-        t_outtab               = tmp_table.
+        t_outtab               = paramter_table.
     " Freeing the table, while the first element is kept.
     LOOP AT comments_table FROM 2 INTO DATA(ls_header).
       DELETE comments_table INDEX 2.
@@ -135,18 +147,20 @@ CLASS store IMPLEMENTATION.
     DATA: tmp_table like Inventory.
     split keyword at ':' into DATA(str1) DATA(str2).
     if str1 = 'name'.
-      APPEND LINES OF append_comment_pair( key = 'Find by Category' value = str1 ) to comments_table.
+      APPEND LINES OF append_comment_pair( key = 'Find by ' value = str1 ) to comments_table.
       APPEND LINES OF append_comment_italic( 'SELECT * from Inventory where'  )  to comments_table.
-      APPEND LINES OF append_comment_italic( 'name LIKE %' && keyword && '% ') to comments_table.
+      APPEND LINES OF append_comment_italic( 'name LIKE %' && str2 && '% ') to comments_table.
       APPEND LINES OF append_comment_italic( 'or') to comments_table.
-      APPEND LINES OF append_comment_italic( 'desc LIKE %' && keyword && '%' ) to comments_table.
-      LOOP AT Inventory INTO product_instance WHERE name CS keyword OR desc CS str2.
+      APPEND LINES OF append_comment_italic( 'desc LIKE %' && str2 && '%' ) to comments_table.
+
+      LOOP AT Inventory INTO product_instance WHERE name CS str2 OR desc CS str2.
         append product_instance to tmp_table.
       ENDLOOP.
 
     elseif str1 = 'category'.
       APPEND LINES OF append_comment_pair( key = 'Find by' value = str1 ) to comments_table.
       APPEND LINES OF append_comment_italic( 'SELECT * from Inventory where category = ' && str2  ) to comments_table.
+
       LOOP AT Inventory INTO product_instance WHERE category CS str2.
         append product_instance to tmp_table.
       ENDLOOP.
@@ -224,13 +238,13 @@ CLASS store IMPLEMENTATION.
   method generate_report.
     free comments_table.
     free col_header_table.
+
     TYPES: begin of report_struct,
              category                type string,
              num_product_in_category type i,
              average_price           type P length 10 decimals 2,
              total_price             type P length 10 decimals 2,
            end of report_struct.
-
     DATA: Report              type table of report_struct,
           report_instance     type report_struct,
           ref_report_instance type ref to report_struct,
@@ -249,15 +263,16 @@ CLASS store IMPLEMENTATION.
       endif.
       counter = counter + 1.
     endloop.
+
     loop at Report reference into ref_report_instance.
       ref_report_instance->average_price =  ref_report_instance->total_price /
                                             ref_report_instance->num_product_in_category.
     endloop.
 
-    init_ALV_column( pos = 1 header = 'category' col_name = 'Category' len = 10  ).
-    init_ALV_column( pos = 2 header = 'num_product_in_category' col_name = 'Number of product' len = 15  ).
-    init_ALV_column( pos = 3 header = 'total_price' col_name = 'Total Items Price' len = 20  ).
-    init_ALV_column( pos = 4 header = 'average_price' col_name = 'Average Price' len = 10  ).
+     APPEND LINES OF init_ALV_column( pos = 1 header = 'category' col_name = 'Category' len = 10  ) to col_header_table.
+     APPEND LINES OF init_ALV_column( pos = 2 header = 'num_product_in_category' col_name = 'Number of product' len = 15  ) to col_header_table.
+     APPEND LINES OF init_ALV_column( pos = 3 header = 'total_price' col_name = 'Total Items Price' len = 20  ) to col_header_table.
+     APPEND LINES OF init_ALV_column( pos = 4 header = 'average_price' col_name = 'Average Price' len = 10  ) to col_header_table.
 
     APPEND LINES OF append_comment_header( 'Final Report For Products' ) to comments_table.
     APPEND LINES OF append_comment_pair( key = 'Data :' value = date ) to comments_table.
@@ -302,23 +317,4 @@ CLASS store IMPLEMENTATION.
     READ TABLE inventory INTO product_instance WITH KEY product_id = ID.
     is_exists = sy-subrc = 0.
   ENDMETHOD.
-  "********************************************************************************
-  "* Method: make_table_readable
-  "* Purpose: We change the abap_bool value to a string to read it as Available or not Available
-  "* instead of x or empty
-  "********************************************************************************
-  method make_table_readable.
-    LOOP AT table INTO product_instance.
-      tmp_table_instance-product_id = product_instance-product_id.
-      tmp_table_instance-name = product_instance-name.
-      tmp_table_instance-desc = product_instance-desc.
-      tmp_table_instance-category = product_instance-category.
-      tmp_table_instance-price = product_instance-price.
-      tmp_table_instance-is_available = 'Available'.
-      if product_instance-is_available = abap_false.
-        tmp_table_instance-is_available = 'Not Available'.
-      endif.
-      append tmp_table_instance to res.
-    ENDLOOP.
-  endmethod.
 ENDCLASS.

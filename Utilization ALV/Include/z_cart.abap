@@ -6,28 +6,6 @@ CLASS Cart DEFINITION inheriting from Operations.
     CLASS-DATA: cart_id_counter TYPE i VALUE 1.
     DATA: no_historization TYPE abap_bool VALUE abap_false.
 
-    TYPES: begin of product_cart_table,
-             cart_id       type i,
-             customer_id   type i,
-             customer_name type string,
-             product_id    type i,
-             price         type p length 10 decimals 2,
-             product_name  type string,
-           end of product_cart_table.
-
-    DATA: tmp_table2          type table of product_cart_table,
-          tmp_table_instance2 type product_cart_table.
-
-    TYPES: BEGIN OF cart_readable,
-             cart_id      TYPE I,
-             customer_id  TYPE I,
-             product_id   TYPE I,
-             history_flag TYPE string,
-           END OF cart_readable.
-
-    DATA: tmp_table          TYPE TABLE OF cart_readable,
-          tmp_table_instance TYPE cart_readable.
-
     METHODS:
       add_item IMPORTING
                  cart_id      TYPE i
@@ -66,11 +44,7 @@ CLASS Cart DEFINITION inheriting from Operations.
                                    instance      TYPE Cart_struct
                          returning value(result) type String,
 
-      make_table_readable importing
-                                    table      like Customer_cart
-                          returning value(res) like tmp_table,
-
-      display_tmp_table,
+      display_product_cart_table,
 
       flag_item_by_customer_id IMPORTING
                                  customer_id TYPE i,
@@ -100,16 +74,23 @@ CLASS Cart IMPLEMENTATION.
     IF sy-subrc = 0.
       READ TABLE Inventory INTO product_instance WITH KEY product_id = product_id.
       IF sy-subrc = 0.
-        cart_instance = VALUE #( cart_id = cart_id customer_id = customer_id product_id = product_id history_flag = history_flag ).
+        cart_instance = VALUE #( cart_id = cart_id
+                                 customer_id = customer_id
+                                 product_id = product_id
+                                 history_flag = history_flag
+                                 history_flag_str = 'NA' ).
+        if cart_instance-history_flag = abap_true.
+          cart_instance-history_flag_str = 'Historized'.
+        endif.
         INSERT cart_instance INTO TABLE Customer_cart.
         cart_id_counter = cart_id_counter + 1.
       ELSE.
-        APPEND LINES OF append_comment_italic( 'Product of the ID :' && product_id &&' does not exists!' ) to comments_table.
-        APPEND LINES OF append_comment_italic( ' ' ) to comments_table.
+        "APPEND LINES OF append_comment_italic( 'Product of the ID :' && product_id &&' does not exists!' ) to comments_table.
+        "APPEND LINES OF append_comment_italic( ' ' ) to comments_table.
       ENDIF.
     ELSE.
-      APPEND LINES OF append_comment_italic( 'Customer of the ID :' && customer_id &&' does not exists!') to comments_table.
-      APPEND LINES OF append_comment_italic( ' ' ) to comments_table.
+      "APPEND LINES OF append_comment_italic( 'Customer of the ID :' && customer_id &&' does not exists!') to comments_table.
+      "APPEND LINES OF append_comment_italic( ' ' ) to comments_table.
     ENDIF.
   ENDMETHOD.
   "********************************************************************************
@@ -120,7 +101,7 @@ CLASS Cart IMPLEMENTATION.
     APPEND LINES OF init_ALV_column( pos = 1 header = 'cart_id' col_name = 'Id' len = 2  ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 2 header = 'customer_id' col_name = 'Customer Id' len = 10 ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 3 header = 'product_id' col_name = 'Product Id' len = 10  ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 4 header = 'history_flag' col_name = 'historized' len =  10 ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 4 header = 'history_flag_str' col_name = 'historized' len =  10 ) to col_header_table.
   endmethod.
   "********************************************************************************
   "* Method: display_cart_table
@@ -133,9 +114,9 @@ CLASS Cart IMPLEMENTATION.
       APPEND LINES OF append_comment_pair( key = 'Date :' value = '' && date ) to comments_table.
       APPEND LINES OF append_comment_italic( 'Look at the table and check the item.' ) to comments_table.
       APPEND LINES OF append_comment_italic( 'After pressing ESC, we will process the data.' ) to comments_table.
-      DATA(tmp_table) = make_table_readable( Customer_cart ).
+      DATA(parameter_table) = Customer_cart.
     else.
-      tmp_table = make_table_readable( table ).
+      parameter_table = table.
     endif.
     CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
       EXPORTING
@@ -143,29 +124,29 @@ CLASS Cart IMPLEMENTATION.
         i_callback_top_of_page = 'TOP_OF_PAGE'
         it_fieldcat            = col_header_table
       TABLES
-        t_outtab               = tmp_table.
+        t_outtab               = parameter_table.
     " Freeing the table, while the first element is kept.
     LOOP AT comments_table FROM 2 INTO DATA(ls_header).
       DELETE comments_table INDEX 2.
     ENDLOOP.
   endmethod.
   "********************************************************************************
-  "* Method: display_tmp_table
-  "* Purpose: Display tmp table
+  "* Method: display_product_cart_table
+  "* Purpose: Display Product cart table
   "********************************************************************************
-  method display_tmp_table.
+  method display_product_cart_table.
     CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
       EXPORTING
         i_callback_program     = sy-repid
         i_callback_top_of_page = 'TOP_OF_PAGE'
         it_fieldcat            = col_header_table
       TABLES
-        t_outtab               = tmp_table2.
+        t_outtab               = product_cart.
     " Freeing the table, while the first element is kept.
     LOOP AT comments_table FROM 2 INTO DATA(ls_header).
       DELETE comments_table INDEX 2.
     ENDLOOP.
-    free tmp_table2.
+    " free product_cart.
   endmethod.
   "********************************************************************************
   "* Method: display_customer_cart
@@ -188,50 +169,43 @@ CLASS Cart IMPLEMENTATION.
       IF sy-subrc = 0.
         READ TABLE Customer INTO customer_instance WITH KEY customer_id = customer_id.
         if  sy-subrc = 0.
-          tmp_table_instance2-cart_id = cart_instance-cart_id.
-          tmp_table_instance2-customer_id = cart_instance-customer_id.
-          tmp_table_instance2-customer_name = customer_instance-name.
-          tmp_table_instance2-product_id = cart_instance-product_id.
-          tmp_table_instance2-product_name = product_instance-name.
-          tmp_table_instance2-price = product_instance-price.
-          append tmp_table_instance2 to tmp_table2.
+          product_cart_instance-cart_id = cart_instance-cart_id.
+          product_cart_instance-customer_id = cart_instance-customer_id.
+          product_cart_instance-customer_name = customer_instance-name.
+          product_cart_instance-product_id = cart_instance-product_id.
+          product_cart_instance-product_name = product_instance-name.
+          product_cart_instance-price = product_instance-price.
+          append product_cart_instance to product_cart.
           total_price = total_price + product_instance-price.
         endif.
       ENDIF.
     ENDLOOP.
     APPEND LINES OF append_comment_italic(' Total reconds => ' && total_price && 'CHF' ) to comments_table.
-    display_tmp_table( ).
+    display_product_cart_table( ).
   ENDMETHOD.
   "********************************************************************************
   "* Method: display_product_cart
   "* Purpose: Find all customer for certain product
   "********************************************************************************
   METHOD display_product_cart.
-    free col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 1 header = 'cart_id' col_name = 'Id' len = 2  ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 2 header = 'customer_id' col_name = 'Customer Id' len = 10 ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 2 header = 'customer_name' col_name = 'Customer Name' len = 20 ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 3 header = 'product_id' col_name = 'Product Id' len = 10  ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 3 header = 'product_name' col_name = 'Product Name' len = 40  ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 3 header = 'price' col_name = 'Price' len = 10  ) to col_header_table.
-
     APPEND LINES OF append_comment_italic( 'SELECT * form Customer_cart where product_id = ' && product_id ) to comments_table.
+
     LOOP AT Customer_cart INTO cart_instance WHERE product_id = product_id AND history_flag <> abap_true.
       READ TABLE Inventory INTO product_instance WITH KEY product_id = cart_instance-product_id.
       IF sy-subrc = 0.
         READ TABLE Customer INTO customer_instance WITH KEY customer_id = cart_instance-customer_id.
         if  sy-subrc = 0.
-          tmp_table_instance2-cart_id = cart_instance-cart_id.
-          tmp_table_instance2-customer_id = cart_instance-customer_id.
-          tmp_table_instance2-customer_name = customer_instance-name.
-          tmp_table_instance2-product_id = cart_instance-product_id.
-          tmp_table_instance2-product_name = product_instance-name.
-          tmp_table_instance2-price = product_instance-price.
-          append tmp_table_instance2 to tmp_table2.
+          product_cart_instance-cart_id = cart_instance-cart_id.
+          product_cart_instance-customer_id = cart_instance-customer_id.
+          product_cart_instance-customer_name = customer_instance-name.
+          product_cart_instance-product_id = cart_instance-product_id.
+          product_cart_instance-product_name = product_instance-name.
+          product_cart_instance-price = product_instance-price.
+          append product_cart_instance to product_cart.
         endif.
       ENDIF.
     ENDLOOP.
-    display_tmp_table( ).
+    display_product_cart_table( ).
   ENDMETHOD.
   "********************************************************************************
   "* Method: update_item
@@ -239,6 +213,7 @@ CLASS Cart IMPLEMENTATION.
   "********************************************************************************
   METHOD update_item.
     APPEND LINES OF append_comment_italic( 'UPDATE Customer_cart set ... where id = ' && cart_id ) to comments_table.
+
     READ TABLE Customer_cart INTO cart_instance WITH KEY cart_id = cart_id.
     IF sy-subrc = 0.
       READ TABLE Customer INTO customer_instance WITH KEY customer_id = customer_id.
@@ -300,7 +275,6 @@ CLASS Cart IMPLEMENTATION.
   "* Purpose: Checkout for a certain customer
   "********************************************************************************
   METHOD checkout.
-    clear comments_table.
     READ TABLE Customer INTO customer_instance WITH KEY customer_id = customer_id.
     IF sy-subrc = 0.
       APPEND LINES OF append_comment_pair( key = 'Checkout for user = ' value =  customer_instance-name ) to comments_table.
@@ -328,7 +302,6 @@ CLASS Cart IMPLEMENTATION.
     ELSE.
       APPEND LINES OF append_comment_italic( 'No Cart exists for the user with the id of:' && customer_id ) to comments_table.
     ENDIF.
-    clear comments_table.
   ENDMETHOD.
   "********************************************************************************
   "* Method: login_and_view
@@ -356,17 +329,17 @@ CLASS Cart IMPLEMENTATION.
         LOOP AT Customer_cart INTO cart_instance WHERE customer_id = customer_id AND history_flag = history_flag.
           READ TABLE Inventory INTO product_instance WITH KEY product_id = cart_instance-product_id.
           IF sy-subrc = 0.
-            tmp_table_instance2-cart_id = cart_instance-cart_id.
-            tmp_table_instance2-customer_id = cart_instance-customer_id.
-            tmp_table_instance2-product_id = cart_instance-product_id.
-            tmp_table_instance2-price = product_instance-price.
-            tmp_table_instance2-product_name = product_instance-name.
-            append tmp_table_instance2 to tmp_table2.
+            product_cart_instance-cart_id = cart_instance-cart_id.
+            product_cart_instance-customer_id = cart_instance-customer_id.
+            product_cart_instance-product_id = cart_instance-product_id.
+            product_cart_instance-price = product_instance-price.
+            product_cart_instance-product_name = product_instance-name.
+            append product_cart_instance to product_cart.
             total_price = total_price + product_instance-price.
             WRITE:/.
           ENDIF.
         ENDLOOP.
-        display_tmp_table( ).
+        display_product_cart_table( ).
       else.
         APPEND LINES OF append_comment_italic( 'The Email or the password is incorrect' ) to comments_table.
       endif.
@@ -391,22 +364,5 @@ CLASS Cart IMPLEMENTATION.
   method free_tables.
     FREE comments_table.
     FREE col_header_table.
-  endmethod.
-  "********************************************************************************
-  "* Method: make_table_readable
-  "* Purpose: We change the abap_bool value to a string to read it as Premium or Flagged
-  "* instead of x or empty
-  "********************************************************************************
-  method make_table_readable.
-    LOOP AT customer_Cart INTO cart_instance.
-      tmp_table_instance-cart_id = cart_instance-cart_id.
-      tmp_table_instance-customer_id = cart_instance-customer_id.
-      tmp_table_instance-product_id = cart_instance-product_id.
-      tmp_table_instance-history_flag = 'NA'.
-      if cart_instance-history_flag = abap_true.
-        tmp_table_instance-history_flag = 'Historized'.
-      endif.
-      append tmp_table_instance to res.
-    ENDLOOP.
   endmethod.
 ENDCLASS.

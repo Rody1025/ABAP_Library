@@ -74,6 +74,7 @@ Include z_cart.
 Include z_review.
 
 START-OF-SELECTION.
+
   DATA: gamestore TYPE REF TO Store.
   gamestore = NEW Store(  ).
   perform populate_store_with_products.
@@ -101,8 +102,13 @@ START-OF-SELECTION.
 
   gamestore_customer->find_users_by_name( 'Lee' ).
 
-  gamestore_customer->update_customer( ID = 6 name = 'Emily Lee' email = 'emily.lee@example.com'
-  password = 'Elee2022'  flag = abap_true flag_comments = 'Removed from Permium, cause of suspicious activity' ).
+  gamestore_customer->update_customer( ID = 6
+                                       name = 'Emily Lee'
+                                       email = 'emily.lee@example.com'
+                                       password = 'Elee2022'
+                                       premium = abap_false
+                                       flag = abap_true
+                                       flag_comments = 'Removed from Permium, cause of suspicious activity' ).
   gamestore_customer->delete_cusomter( 11 ).
   gamestore_customer->find_all_flagged(  ).
   gamestore_customer->free_tables(  ).
@@ -218,6 +224,26 @@ form populate_store_with_products.
   category = 'Outdoor Gear' price = '399.99' is_available = abap_true ).
   gamestore->add_product( ID = Store=>product_id_counter name = 'LEGO Star Wars Millennium Falcon' desc = 'A large and detailed LEGO set of the iconic Millennium Falcon spaceship'
   category = 'Toys' price = '799.99' is_available = abap_false ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Samsung Galaxy S21 Ultra' desc = 'A high-end smartphone with advanced camera features'
+  category = 'Electronics' price = '1299.99' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Fitbit Charge 5' desc = 'A fitness tracker with 7-day battery life'
+  category = 'Wearables' price = '179.99' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Bose QuietComfort 45' desc = 'Wireless noise-cancelling headphones'
+  category = 'Audio' price = '329.99' is_available = abap_false ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Nikon D850' desc = 'A professional-grade DSLR camera with 45.7 megapixels'
+  category = 'Photography' price = '3799.99' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'MacBook Pro 16-inch' desc = 'A powerful laptop for professional use'
+  category = 'Computers' price = '2399.99' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Peloton Bike+' desc = 'An indoor exercise bike with live and on-demand classes'
+  category = 'Fitness' price = '2495.00' is_available = abap_false ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Google Nest Hub (2nd gen)' desc = 'A smart speaker with a 7-inch touchscreen display'
+  category = 'Smart Home' price = '99.99' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Instant Pot Duo 7-in-1' desc = 'A multi-cooker that can pressure cook, sauté, steam, and more'
+  category = 'Kitchen Appliances' price = '89.99' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'The North Face Venture 2 Jacket' desc = 'A waterproof and breathable rain jacket for outdoor activities'
+  category = 'Outdoor Gear' price = '99.00' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'LEGO Harry Potter Hogwarts Castle' desc = 'A detailed LEGO set of the iconic Hogwarts Castle'
+  category = 'Toys' price = '399.99' is_available = abap_false ).
 endform.
 
 FORM populate_store_with_customers.
@@ -276,7 +302,6 @@ Form populate_customer_cart.
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 8 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 8 product_id = 1 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 20 product_id = 8  history_flag = abap_false ).
-  gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 1 product_id = 56  history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 50 product_id = 50 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 10 product_id = 10 history_flag = abap_false ).
   gamestore_customer_cart->add_item( cart_id = Cart=>cart_id_counter customer_id = 9 product_id = 9 history_flag = abap_false ).
