@@ -85,6 +85,7 @@ START-OF-SELECTION.
   gamestore->find_by_keyword( keyword = 'category:Games' ).
   gamestore->find_by_keyword( keyword = 'name:PlayStation' ).
   gamestore->find_by_price_range( start = '50.10' END = '200.20' ).
+  gamestore->find_product_by_date( 'produced 3 years ago' ).
 
   gamestore->update_availability_by_id( ID = 11 ).
   gamestore->update_availability_by_keyword( keyword = 'PlayStation' ).
@@ -161,89 +162,49 @@ START-OF-SELECTION.
   "********************************************************************************
 form populate_store_with_products.
   gamestore->add_product( ID = Store=>product_id_counter name = 'PlayStation 5' desc = 'The latest gaming console from Sony'
-  category = 'Consoles' price = '499.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Xbox Series X' desc = 'The latest gaming console from Microsoft'
-  category = 'Consoles' price = '499.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Nintendo Switch' desc = 'A hybrid console that can be played on-the-go or on a TV'
-  category = 'Consoles' price = '299.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'FIFA 23' desc = 'The latest installment in the popular soccer video game franchise'
-  category = 'Games' price = '59.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Call of Duty: Vanguard' desc = 'A first-person shooter video game set in World War II'
-  category = 'Games' price = '69.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Super Mario 3D World + Bowser''s Fury' desc = 'A platformer video game featuring Mario and friends'
-  category = 'Games' price = '59.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'DualShock 4 Wireless Controller' desc = 'A wireless controller for the PlayStation 4 console'
-  category = 'Accessories' price = '59.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Xbox Wireless Controller' desc = 'A wireless controller for the Xbox Series X and S consoles'
-  category = 'Accessories' price = '59.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Nintendo Switch Pro Controller' desc = 'A wireless controller for the Nintendo Switch console'
-  category = 'Accessories' price = '69.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'LG 27 Inch UHD Ultragear Gaming Monitor' desc = 'A high-end gaming monitor with a 4K resolution and a 144Hz refresh rate'
-  category = 'Accessories' price = '1099.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Razer BlackWidow V3 Wireless Keyboard' desc = 'A wireless mechanical gaming keyboard with RGB lighting'
-  category = 'Accessories' price = '229.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Logitech G Pro Wireless Gaming Mouse' desc = 'A wireless gaming mouse with a high-precision sensor'
-  category = 'Accessories' price = '129.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Xbox Series X' desc = 'The latest gaming console from Microsoft'
-  category = 'Consoles' price = '499.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Nintendo Switch' desc = 'A hybrid console that can be played on-the-go or on a TV'
-  category = 'Consoles' price = '299.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'FIFA 23' desc = 'The latest installment in the popular soccer video game franchise'
-  category = 'Games' price = '59.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Call of Duty: Vanguard' desc = 'A first-person shooter video game set in World War II'
-  category = 'Games' price = '69.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Super Mario 3D World + Bowser''s Fury' desc = 'A platformer video game featuring Mario and friends'
-  category = 'Games' price = '59.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'DualShock 4 Wireless Controller' desc = 'A wireless controller for the PlayStation 4 console'
-  category = 'Accessories' price = '59.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Xbox Wireless Controller' desc = 'A wireless controller for the Xbox Series X and S consoles'
-  category = 'Accessories' price = '59.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Nintendo Switch Pro Controller' desc = 'A wireless controller for the Nintendo Switch console'
-  category = 'Accessories' price = '69.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'LG 27 Inch UHD Ultragear Gaming Monitor' desc = 'A high-end gaming monitor with a 4K resolution and a 144Hz refresh rate'
-  category = 'Accessories' price = '1099.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Razer BlackWidow V3 Wireless Keyboard' desc = 'A wireless mechanical gaming keyboard with RGB lighting'
-  category = 'Accessories' price = '229.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Apple iPhone 13' desc = 'The latest smartphone from Apple'
-  category = 'Electronics' price = '1099.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Samsung Galaxy Watch 4' desc = 'Smartwatch from Samsung with a long-lasting battery'
-   category = 'Wearables' price = '349.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Bose QuietComfort 35 II Wireless Headphones' desc = 'Noise-cancelling headphones from Bose'
-   category = 'Audio' price = '329.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Canon EOS R5' desc = 'A professional full-frame mirrorless camera'
-  category = 'Photography' price = '3899.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Microsoft Surface Laptop 4' desc = 'A premium laptop from Microsoft with touchscreen display'
-   category = 'Computers' price = '1299.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Fitbit Charge 5' desc = 'A fitness tracker from Fitbit with GPS and heart rate monitor'
-  category = 'Fitness' price = '179.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Nest Learning Thermostat' desc = 'A smart thermostat from Google'
-   category = 'Smart Home' price = '249.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'KitchenAid Stand Mixer' desc = 'A classic mixer for all your baking needs'
-  category = 'Kitchen Appliances' price = '399.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'YETI Tundra Haul Portable Wheeled Cooler' desc = 'A rugged cooler with wheels from YETI'
-  category = 'Outdoor Gear' price = '399.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'LEGO Star Wars Millennium Falcon' desc = 'A large and detailed LEGO set of the iconic Millennium Falcon spaceship'
-  category = 'Toys' price = '799.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Samsung Galaxy S21 Ultra' desc = 'A high-end smartphone with advanced camera features'
-  category = 'Electronics' price = '1299.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Fitbit Charge 5' desc = 'A fitness tracker with 7-day battery life'
-  category = 'Wearables' price = '179.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Bose QuietComfort 45' desc = 'Wireless noise-cancelling headphones'
-  category = 'Audio' price = '329.99' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Nikon D850' desc = 'A professional-grade DSLR camera with 45.7 megapixels'
-  category = 'Photography' price = '3799.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'MacBook Pro 16-inch' desc = 'A powerful laptop for professional use'
-  category = 'Computers' price = '2399.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Peloton Bike+' desc = 'An indoor exercise bike with live and on-demand classes'
-  category = 'Fitness' price = '2495.00' is_available = abap_false ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Google Nest Hub (2nd gen)' desc = 'A smart speaker with a 7-inch touchscreen display'
-  category = 'Smart Home' price = '99.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'Instant Pot Duo 7-in-1' desc = 'A multi-cooker that can pressure cook, sauté, steam, and more'
-  category = 'Kitchen Appliances' price = '89.99' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'The North Face Venture 2 Jacket' desc = 'A waterproof and breathable rain jacket for outdoor activities'
-  category = 'Outdoor Gear' price = '99.00' is_available = abap_true ).
-  gamestore->add_product( ID = Store=>product_id_counter name = 'LEGO Harry Potter Hogwarts Castle' desc = 'A detailed LEGO set of the iconic Hogwarts Castle'
-  category = 'Toys' price = '399.99' is_available = abap_false ).
+  category = 'Consoles' price = '499.99' production_date = '2020/11/12' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Xbox Series X' desc = 'The most powerful Xbox console yet'
+  category = 'Consoles' price = '499.99' production_date = '2020/11/10' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'The Legend of Zelda: Breath of the Wild' desc = 'An epic adventure game for the Nintendo Switch'
+  category = 'Games' price = '59.99' production_date = '2017/03/03' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Logitech G502 HERO' desc = 'A high-performance gaming mouse'
+  category = 'Accessories' price = '79.99' production_date = '2018/09/03' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Canon EOS Rebel T7' desc = 'A beginner-friendly DSLR camera'
+   category = 'Photography' price = '399.99' production_date = '2019/02/25' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Fitbit Versa 3' desc = 'A stylish and versatile smartwatch'
+  category = 'Wearables' price = '229.95' production_date = '2020/09/25' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Bose QuietComfort 35 II' desc = 'Wireless noise-cancelling headphones'
+  category = 'Audio' price = '299.00' production_date = '2017/09/22' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Apple MacBook Air' desc = 'A thin and lightweight laptop'
+  category = 'Computers' price = '999.00' production_date = '2020/11/17' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Peloton Bike+' desc = 'A high-tech indoor exercise bike'
+  category = 'Fitness' price = '2495.00' production_date = '2021/01/05' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Instant Pot Duo' desc = 'A multi-functional electric pressure cooker'
+  category = 'Kitchen Appliances' price = '99.99' production_date = '2018/01/01' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Nest Learning Thermostat' desc = 'A smart thermostat for your home'
+  category = 'Smart Home' price = '249.00' production_date = '2011/10/25' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Osprey Atmos AG 65' desc = 'A comfortable and durable hiking backpack'
+  category = 'Outdoor Gear' price = '270.00' production_date = '2017/05/23' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'LEGO Star Wars Millennium Falcon' desc = 'An iconic LEGO set for Star Wars fans'
+  category = 'Toys' price = '149.99' production_date = '2017/09/01' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'FIFA 22' desc = 'The latest installment in the popular soccer game franchise'
+  category = 'Games' price = '59.99' production_date = '2021/10/01' is_available = abap_false ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'GoPro HERO10 Black' desc = 'A high-quality action camera for capturing outdoor adventures'
+  category = 'Photography' price = '499.99' production_date = '2021/09/16' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Apple AirPods Pro' desc = 'Wireless earbuds with active noise cancellation'
+  category = 'Audio' price = '249.00' production_date = '2019/10/30' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Samsung Galaxy Watch 4' desc = 'A stylish and feature-packed smartwatch'
+  category = 'Wearables' price = '249.99' production_date = '2021/08/27' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Dell XPS 13' desc = 'A powerful and portable laptop'
+  category = 'Computers' price = '999.99' production_date = '2021/01/14' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Bowflex SelectTech 552' desc = 'Adjustable dumbbells for versatile workouts at home'
+  category = 'Fitness' price = '349.99' production_date = '2015/01/01' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Weber Spirit II E-310' desc = 'A high-quality gas grill for outdoor cooking'
+  category = 'Outdoor Gear' price = '529.00' production_date = '2018/02/01' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Amazon Echo Dot' desc = 'A compact and affordable smart speaker'
+  category = 'Smart Home' price = '49.99' production_date = '2018/10/11' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'Nikon D3500' desc = 'A beginner-friendly DSLR camera with great image quality'
+  category = 'Photography' price = '449.99' production_date = '2018/08/30' is_available = abap_true ).
 endform.
 
 FORM populate_store_with_customers.

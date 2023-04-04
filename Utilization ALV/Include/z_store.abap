@@ -6,12 +6,15 @@ INCLUDE z_process_table.
 DATA: comments_table TYPE slis_t_listheader,
       comments       TYPE slis_listheader.
 
+"********************************************************************************
+"* Subroutine: top_of_page
+"* Purpose: Append the comments to the comments table
+"********************************************************************************
 FORM top_of_page.
   CALL FUNCTION 'REUSE_ALV_COMMENTARY_WRITE'
     EXPORTING
       it_list_commentary = comments_table.
 ENDFORM.
-
 "********************************************************************************
 "* Class: Store
 "* Purpose: DEFINITION for Store Class
@@ -26,6 +29,7 @@ CLASS Store DEFINITION inheriting from Operations.
                     desc             TYPE string
                     category         TYPE string
                     price            TYPE p
+                    production_date  TYPE String
                     is_available     TYPE abap_bool
                     is_available_str TYPE String default 'Available',
 
@@ -44,6 +48,8 @@ CLASS Store DEFINITION inheriting from Operations.
 
       delete_by_id IMPORTING
                      ID TYPE I,
+      find_product_by_date IMPORTING
+                             input_str TYPE STring,
 
       init_ALV_columns redefinition,
       free_tables redefinition,
@@ -61,6 +67,9 @@ CLASS Store DEFINITION inheriting from Operations.
           gv_page_size TYPE i VALUE 10.
 
     METHODS:
+      convert_str_to_date importing
+                                    production_date type String
+                          returning value(res)      type d,
       display_single_row IMPORTING
                                    instance      type  Product
                          returning value(result) type string.
@@ -71,16 +80,26 @@ ENDCLASS.
 "********************************************************************************
 CLASS store IMPLEMENTATION.
   "********************************************************************************
+  "* Private Method: convert_str_to_date
+  "* Purpose: Convert String to date
+  "********************************************************************************
+  method convert_str_to_date.
+    SPLIT production_date at '/' into DATA(year) DATA(month) DATA(day).
+    res = year && month && day.
+  endmethod.
+  "********************************************************************************
   "* Method: add_product
   "* Purpose: Add product to the Inventory
   "********************************************************************************
   METHOD add_product.
     DATA(exists) = check_if_exist( ID = ID ).
+    data(date) = convert_str_to_date( production_date ).
     product_instance = VALUE #( product_id  = ID
                                 name = name
                                 desc = desc
                                 category = category
                                 price = price
+                                production_date = date
                                 is_available = is_available
                                 is_available_str = 'Available' ).
     if is_available = abap_false.
@@ -106,8 +125,9 @@ CLASS store IMPLEMENTATION.
   method init_ALV_columns.
     APPEND LINES OF init_ALV_column( pos = 1 header = 'product_id' col_name = 'Id' len = 2 ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 2 header = 'name' col_name = 'Name' len = 30 ) to col_header_table.
-    APPEND LINES OF init_ALV_column( pos = 3 header = 'category' col_name = 'Category' len = 10  ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 3 header = 'category' col_name = 'Category' len = 13  ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 4 header = 'price' col_name = 'Price' len =  10 ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 5 header = 'production_date' col_name = 'Production Date' len = 13 ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 5 header = 'is_available_str' col_name = 'Availability' len = 10 ) to col_header_table.
     APPEND LINES OF init_ALV_column( pos = 6 header = 'desc' col_name = 'Description' len = 60 ) to col_header_table.
   endmethod.
@@ -120,6 +140,7 @@ CLASS store IMPLEMENTATION.
       APPEND LINES OF append_comment_header( 'Product Table' ) to comments_table.
       APPEND LINES OF append_comment_pair( key = 'Total Product :' value = '' && get_table_length( Inventory ) ) to comments_table.
       APPEND LINES OF append_comment_pair( key = 'Date :' value = '' && date ) to comments_table.
+      APPEND LINES OF append_comment_pair( key = 'Time :' value = '' && time ) to comments_table.
       APPEND LINES OF append_comment_italic( 'Look at the table and check the item.' ) to comments_table.
       APPEND LINES OF append_comment_italic( 'After pressing ESC, we will process/manipulate the data.' ) to comments_table.
       DATA(paramter_table) =  Inventory.
@@ -213,6 +234,35 @@ CLASS store IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
   "********************************************************************************
+  "* Method: find_product_by_date
+  "* Purpose: Find all Products of a certain age
+  "********************************************************************************
+  method find_product_by_date.
+    DATA: words           TYPE standard table of String,
+          year    TYPE I,
+          calculated_year TYPE I,
+          calculated_date TYPE d.
+    DATA: tmp_table like Inventory.
+
+    SPLIT input_str at ' ' INTO table words.
+    LOOP AT words INTO DATA(word).
+      IF word CO '0123456789'.
+        year = word.
+        EXIT.
+      ENDIF.
+    ENDLOOP.
+    calculated_year = sy-datum(4) - year.
+    calculated_date = |{ calculated_year }0101|.
+
+    APPEND LINES OF append_comment_italic( 'Search for all products that were made ~ :' && year && ' Years ago') to comments_table.
+    APPEND LINES OF append_comment_italic( sy-datum && ' - ' &&  calculated_date ) to comments_table.
+
+    LOOP at Inventory into product_instance where production_date >= calculated_date.
+      append product_instance to tmp_table.
+    endloop.
+    display_table( is_inital = abap_false table = tmp_table ).
+  endmethod.
+  "********************************************************************************
   "* Method: delete_by_id
   "* Purpose: Delete product form the Inventory
   "********************************************************************************
@@ -269,10 +319,10 @@ CLASS store IMPLEMENTATION.
                                             ref_report_instance->num_product_in_category.
     endloop.
 
-     APPEND LINES OF init_ALV_column( pos = 1 header = 'category' col_name = 'Category' len = 10  ) to col_header_table.
-     APPEND LINES OF init_ALV_column( pos = 2 header = 'num_product_in_category' col_name = 'Number of product' len = 15  ) to col_header_table.
-     APPEND LINES OF init_ALV_column( pos = 3 header = 'total_price' col_name = 'Total Items Price' len = 20  ) to col_header_table.
-     APPEND LINES OF init_ALV_column( pos = 4 header = 'average_price' col_name = 'Average Price' len = 10  ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 1 header = 'category' col_name = 'Category' len = 10  ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 2 header = 'num_product_in_category' col_name = 'Number of product' len = 15  ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 3 header = 'total_price' col_name = 'Total Items Price' len = 20  ) to col_header_table.
+    APPEND LINES OF init_ALV_column( pos = 4 header = 'average_price' col_name = 'Average Price' len = 10  ) to col_header_table.
 
     APPEND LINES OF append_comment_header( 'Final Report For Products' ) to comments_table.
     APPEND LINES OF append_comment_pair( key = 'Data :' value = date ) to comments_table.

@@ -7,6 +7,7 @@ TYPES: BEGIN OF Product,
          desc             TYPE string,
          category         TYPE string,
          price            TYPE p length 10 DECIMALS 2,
+         production_date  TYPE d,
          is_available     TYPE abap_bool,  " Availability
          is_available_str TYPE String,  " Availability
        END OF Product.
@@ -66,4 +67,6 @@ TYPES: BEGIN OF Review_struct,
 DATA: Customer_review     TYPE TABLE OF Review_struct,
       review_instance     TYPE Review_struct,
       ref_review_instance TYPE REF TO  Review_struct.
-DATA(date) =  sy-datum+6(2) && '/'  && sy-datum+4(2) && '/' && sy-datum(4).
+
+DATA(date) =  sy-datum+6(2) && '/' && sy-datum+4(2) && '/' && sy-datum(4).
+DATA(time) =  sy-uzeit(2) && ':' && sy-uzeit+2(2).
