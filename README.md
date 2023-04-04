@@ -3,13 +3,13 @@
 This is a simple software that can manage the product inventory of a small online store. The system allows store staff to perform basic operations like adding, deleting, sorting, and data processing and manipulation.
 
 ## Table of Contents
-- [ Internal Table Structure](#internal-table)
-- [Manipulation Table](#Manipulation)
-- [Data Processing and Manipulation](#date-processing)
-- [User System](#user)
-- [Cart System](#cart)
-- [Search Functionality](#search)
-- [Review System](#review)
+- [Internal Table Structure](#internal table Structure)
+- [Manipulation Table](#Manipulation table)
+- [Data Processing and Manipulation](#date processing)
+- [User System](#user System)
+- [Cart System](#cart system)
+- [Search Functionality](#search functionality)
+- [Review System](#review system)
 - [ALV](#alv)
     
 ## Internal Table Structure
@@ -25,23 +25,23 @@ To start, we need to create an internal table structure called Product to hold t
 
 ## Manipulation Table
 
-### Adding Products
+#### Adding Products
 
-Store staff can add products to the internal table using the add functionality. This action will insert a new row with the required data fields.
+    Store staff can add products to the internal table using the add functionality. This action will insert a new row with the required data fields.
 
-### Deleting Products
+#### Deleting Products
 
-Products can be removed from the internal table using the delete functionality. This action will delete a row based on a unique identifier, such as the Product ID.
+    Products can be removed from the internal table using the delete functionality. This action will delete a row based on a unique identifier, such as the Product ID.
 
-### Sorting Products
+#### Sorting Products
 
-The store staff can sort the products in the internal table using the sort functionality. They can choose to sort by one or more data fields (e.g., by Product Category and Price).
+    The store staff can sort the products in the internal table using the sort functionality. They can choose to sort by one or more data fields (e.g., by Product Category and Price).
 
 ## Data Processing and Manipulation
 
-The store staff can process and manipulate the data in the internal table using various functions, such as finding all products in a specific category, searching for products within a certain price range, or updating the availability of a product.
+    The store staff can process and manipulate the data in the internal table using various functions, such as finding all products in a specific category, searching for products within a certain price range, or updating the availability of a product.
 
-## Extend
+# Extend
 
 The system can be extended to include the following features:
 
