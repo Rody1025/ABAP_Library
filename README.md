@@ -3,13 +3,13 @@
 This is a simple software that can manage the product inventory of a small online store. The system allows store staff to perform basic operations like adding, deleting, sorting, and data processing and manipulation.
 
 ## Table of Contents
-- [Internal Table Structure](#internal table Structure)
-- [Manipulation Table](#Manipulation table)
-- [Data Processing and Manipulation](#date processing)
-- [User System](#user System)
-- [Cart System](#cart system)
-- [Search Functionality](#search functionality)
-- [Review System](#review system)
+- [Internal Table Structure](#internal-table-Structure)
+- [Manipulation Table](#Manipulation-table)
+- [Data Processing and Manipulation](#date-processing-and-manipulation)
+- [User System](#user-System)
+- [Cart System](#cart-system)
+- [Search Functionality](#search-functionality)
+- [Review System](#review-system)
 - [ALV](#alv)
     
 ## Internal Table Structure
