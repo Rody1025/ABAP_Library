@@ -38,6 +38,15 @@ CLASS Operations DEFINITION.
                      RETURNING VALUE(is_exists) TYPE abap_bool,
 
       free_tables,
+
+      convert_date_to_YYYYMMDD importing
+                                         date          type d
+                               returning value(result) type String,
+
+      convert_str_to_YYYYMMDD importing
+                                    production_date type String
+                          returning value(res)      type d,
+
       generate_report.
   protected section.
   private section.
@@ -77,7 +86,7 @@ CLASS Operations implementation.
     APPEND comments TO comments_table.
     CLEAR comments.
   ENDMETHOD.
-    "********************************************************************************
+  "********************************************************************************
   "* Private Method: init_ALV_column
   "* Purpose: Initialize the column header
   "********************************************************************************
@@ -95,6 +104,21 @@ CLASS Operations implementation.
   "********************************************************************************
   method get_table_length.
     result = LINES( type_any_table ).
+  endmethod.
+  "********************************************************************************
+  "* Private Method: convert_date_to_YYYYMMDD
+  "* Purpose: Convert date to form YYYY/MM/DD
+  "********************************************************************************
+  METHOD convert_date_to_YYYYMMDD.
+    result = date(4) && '/' && date+4(2) && '/' && date+6(2).
+  ENDMETHOD.
+  "********************************************************************************
+  "* Private Method: convert_str_to_date
+  "* Purpose: Convert String to date
+  "********************************************************************************
+  method convert_str_to_YYYYMMDD.
+    SPLIT production_date at '/' into DATA(year) DATA(month) DATA(day).
+    res = year && month && day.
   endmethod.
   "********************************************************************************
   "* Private Method: check_if_exist
@@ -120,7 +144,7 @@ CLASS Operations implementation.
   "********************************************************************************
   method display_table.
   endmethod.
-    "********************************************************************************
+  "********************************************************************************
   "* Private Method: generate_report
   "* Purpose: Generate a report
   "********************************************************************************

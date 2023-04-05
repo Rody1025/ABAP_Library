@@ -205,6 +205,16 @@ form populate_store_with_products.
   category = 'Smart Home' price = '49.99' production_date = '2018/10/11' is_available = abap_true ).
   gamestore->add_product( ID = Store=>product_id_counter name = 'Nikon D3500' desc = 'A beginner-friendly DSLR camera with great image quality'
   category = 'Photography' price = '449.99' production_date = '2018/08/30' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'PlayStation 4 Pro' desc = 'A powerful gaming console from Sony with 4K capabilities'
+  category = 'Consoles' price = '399.99' production_date = '2016/11/10' is_available = abap_false ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'PlayStation VR' desc = 'An immersive virtual reality experience on PlayStation'
+  category = 'Accessories' price = '299.99' production_date = '2016/10/13' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'PlayStation 3' desc = 'The classic gaming console from Sony with a huge library of games'
+  category = 'Consoles' price = '199.99' production_date = '2006/11/17' is_available = abap_false ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'PlayStation Vita' desc = 'A portable gaming console with a stunning OLED screen'
+  category = 'Consoles' price = '199.99' production_date = '2012/02/22' is_available = abap_true ).
+  gamestore->add_product( ID = Store=>product_id_counter name = 'PlayStation Classic' desc = 'Relive the nostalgia of classic PlayStation games in a mini console'
+  category = 'Consoles' price = '99.99' production_date = '2018/12/03' is_available = abap_true ).
 endform.
 
 FORM populate_store_with_customers.

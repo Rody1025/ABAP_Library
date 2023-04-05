@@ -44,7 +44,6 @@ CLASS User DEFINITION inheriting from Operations.
     DATA: col_header_table TYPE SLIS_T_FIELDCAT_ALV,
           column           TYPE SLIS_FIELDCAT_ALV.
     METHODS:
-
       display_single_row IMPORTING
                                    instance      type  User_struct
                          returning value(result) type string.
@@ -149,6 +148,16 @@ CLASS User IMPLEMENTATION.
       <fs_customer_instance>-password = password.
       <fs_customer_instance>-premium = premium.
       <fs_customer_instance>-flag = flag.
+
+      <fs_customer_instance>-premium_str = 'NA'.
+      <fs_customer_instance>-flag_str = 'NA'.
+      if premium = abap_true.
+        <fs_customer_instance>-premium_str = 'Premium'.
+      endif.
+      if flag = abap_true.
+        <fs_customer_instance>-flag_str = 'Flagged!'.
+      endif.
+
       <fs_customer_instance>-flag_comments = flag_comments.
       APPEND LINES OF append_comment_italic( ' ' ) to comments_table.
     ENDLOOP.

@@ -67,9 +67,6 @@ CLASS Store DEFINITION inheriting from Operations.
           gv_page_size TYPE i VALUE 10.
 
     METHODS:
-      convert_str_to_date importing
-                                    production_date type String
-                          returning value(res)      type d,
       display_single_row IMPORTING
                                    instance      type  Product
                          returning value(result) type string.
@@ -79,21 +76,14 @@ ENDCLASS.
 "* Purpose: IMPLEMENTATION for Store Inventory
 "********************************************************************************
 CLASS store IMPLEMENTATION.
-  "********************************************************************************
-  "* Private Method: convert_str_to_date
-  "* Purpose: Convert String to date
-  "********************************************************************************
-  method convert_str_to_date.
-    SPLIT production_date at '/' into DATA(year) DATA(month) DATA(day).
-    res = year && month && day.
-  endmethod.
+
   "********************************************************************************
   "* Method: add_product
   "* Purpose: Add product to the Inventory
   "********************************************************************************
   METHOD add_product.
     DATA(exists) = check_if_exist( ID = ID ).
-    data(date) = convert_str_to_date( production_date ).
+    data(date) = convert_str_to_YYYYMMDD( production_date ).
     product_instance = VALUE #( product_id  = ID
                                 name = name
                                 desc = desc
@@ -215,6 +205,7 @@ CLASS store IMPLEMENTATION.
       DATA(res) = display_single_row( instance = product_instance ).
       APPEND LINES OF append_comment_italic( res ) to comments_table.
       product_instance-is_available = abap_true.
+      product_instance-is_available_str = 'Available'.
       APPEND LINES OF append_comment_italic( ' ' ) to comments_table.
     endif.
   ENDMETHOD.
@@ -223,13 +214,15 @@ CLASS store IMPLEMENTATION.
   "* Purpose: Update the availability of a product by keyword
   "********************************************************************************
   METHOD update_availability_by_keyword.
-    APPEND LINES OF append_comment_italic( 'UPDATE Inventory set is_available = true where name LIKE :' && keyword ) to comments_table.
-    APPEND LINES OF append_comment_italic( '                     name LIKE :' && keyword ) to comments_table.
+    APPEND LINES OF append_comment_italic( 'UPDATE Inventory set is_available = true where') to comments_table.
+    APPEND LINES OF append_comment_italic( 'name LIKE :' && keyword && ' AND is_available = false' ) to comments_table.
+    APPEND LINES OF append_comment_italic( ' ' ) to comments_table.
 
-    LOOP AT Inventory ASSIGNING <fs_instance_product> WHERE name CS keyword.
+    LOOP AT Inventory ASSIGNING <fs_instance_product> WHERE name CS keyword and is_available = abap_false.
       DATA(res) = display_single_row( <fs_instance_product> ).
       APPEND LINES OF append_comment_italic( res ) to comments_table.
       <fs_instance_product>-is_available = abap_true.
+      <fs_instance_product>-is_available_str = 'Available'.
       APPEND LINES OF append_comment_italic( ' ' ) to comments_table.
     ENDLOOP.
   ENDMETHOD.
@@ -239,7 +232,7 @@ CLASS store IMPLEMENTATION.
   "********************************************************************************
   method find_product_by_date.
     DATA: words           TYPE standard table of String,
-          year    TYPE I,
+          year            TYPE I,
           calculated_year TYPE I,
           calculated_date TYPE d.
     DATA: tmp_table like Inventory.
@@ -255,7 +248,9 @@ CLASS store IMPLEMENTATION.
     calculated_date = |{ calculated_year }0101|.
 
     APPEND LINES OF append_comment_italic( 'Search for all products that were made ~ :' && year && ' Years ago') to comments_table.
-    APPEND LINES OF append_comment_italic( sy-datum && ' - ' &&  calculated_date ) to comments_table.
+    APPEND LINES OF append_comment_italic( convert_date_to_YYYYMMDD( calculated_date )
+                                           && ' -- Until -- ' &&
+                                           convert_date_to_YYYYMMDD( sy-datum  ) ) to comments_table.
 
     LOOP at Inventory into product_instance where production_date >= calculated_date.
       append product_instance to tmp_table.
