@@ -6,8 +6,7 @@ This is a simple demonstration of the /ASEM/DOSSIER table.
 - [Purpose](#Purpose)
 - [Objective](#Objective)
 - [Report](#Report)
-- [Manipulation Table](#Manipulation-table)
-- [Keywords Highlighted](#Keywords Highlighted)
+- [Keywords Highlighted](#Keywords-Highlighted)
 
 ## Purpose
 
