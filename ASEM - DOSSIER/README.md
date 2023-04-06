@@ -14,7 +14,7 @@ Create a Z-Report that displays data - where highlighted - from the table.
 | Field       | key      | initial value | data element             | data type | length | decimal | short description                             |
 |-------------|----------|---------------|--------------------------|-----------|--------|---------|-----------------------------------------------|
 | MANDT       | &#x2611; | &#x2611;      | MANDT                    | CLNT      | 3      |         | Client                                        |
-| DOSSIER**     | &#x2611; | &#x2611;      | /ASEM/DE_DOSSIER_NO      | CHAR      | 10     |         |                                               |
+| **DOSSIER**     | &#x2611; | &#x2611;      | /ASEM/DE_DOSSIER_NO      | CHAR      | 10     |         |                                               |
 | **DOSS_TYPE**   |          |               | /ASEM/DE_DOSSIER_TYPE    | CHAR      | 4      |         |                                               |
 | **COP**         |          |               | /ASEM/DE_COP             | CHAR      | 10     |         |                                               |
 | KUNNR       |          |               | KUNNR                    | CHAR      | 10     |         | Customer Number                               |
