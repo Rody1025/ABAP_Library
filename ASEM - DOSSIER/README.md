@@ -22,19 +22,27 @@ The purpose of this exercise is to familiarize yourself with the ASEM/DOSSIER ta
 Create a Z-Report with the following features:
 a. Selection-screen with the fields highlighted in the table.
 
-| Field         | key      | initial value | data element             | data type | length | decimal | short description                             |
-|---------------|----------|---------------|--------------------------|-----------|--------|---------|-----------------------------------------------|
-| **DOSSIER**   | &#x2611; | &#x2611;      | /ASEM/DE_DOSSIER_NO      | CHAR      | 10     |         |                                               |
-| **DOSS_TYPE** |          |               | /ASEM/DE_DOSSIER_TYPE    | CHAR      | 4      |         |                                               |
-| **COP**       |          |               | /ASEM/DE_COP             | CHAR      | 10     |         |                                               |
-| **BUKRS**     |          |               | /ASEM/DE_BUKRS           | CHAR      | 4      |         |                                               |
-| **CIRC**      |          |               | /ASEM/DE_CIRC            | CHAR      | 4      |         |                                               |
+| Field                     | key      | initial value | data element                          | data type    | length | decimal | short description |
+|---------------------------|----------|---------------|---------------------------------------|--------------|--------|---------|-------------------|
+| **DOSSIER**               | &#x2611; | &#x2611;      | /ASEM/DE_DOSSIER_NO                   | CHAR         | 10     |         |                   |
+| **KUNNR**                 |          |               | KUNNR                                 | CHAR         | 10     |         |                   |
+| **DOSS_TYPE**             |          |               | /ASEM/DE_DOSSIER_TYPE                 | CHAR         | 4      |         |                   |
+| **COP**                   |          |               | /ASEM/DE_COP                          | CHAR         | 10     |         |                   |
+| **BUKRS**                 |          |               | /ASEM/DE_BUKRS                        | CHAR         | 4      |         |                   |
+| **CIRC**                  |          |               | /ASEM/DE_CIRC                         | CHAR         | 4      |         |                   |
+| **ERFDATE**               |          |               | /ASEM/DE_ERFDATE                      | DATS         | 8      |         |                   |
+| **INT_CALC_DATE**         |          |               | /ASEM/DE_INTEREST_CALC_LDATE          | DATS         | 8      |         |                   |
+| **INTEREST**              |          |               | /ASEM/DE_INTEREST                     | CURR         | 13     |         |                   |
 
 In which:
 
-### Dossier Number:
+### DOSSIER:
 
 This field represents the unique identifier assigned to each dossier in the ASEM system. It is used to track and manage documents within the system.
+
+### KUNNR:
+
+This field represents the customer number associated with each dossier in the ASEM system. It is used to uniquely identify customers and link them with their respective dossiers.
 
 ### Doss_type:
 
@@ -51,6 +59,14 @@ This field represents the company code associated with the dossier. The company 
 ### CIRC: (Controlling Integrated Reporting Code)
 
 This field represents the circuit associated with the dossier. The circuit is a component of the logistics module in SAP, which allows for tracking and management of inventory and supply chain activities.
+
+### INT_CALC_DATE: 
+
+This field represents the interest calculation date associated with each dossier in the ASEM system. It is used to determine the date on which interest calculations should be performed for the dossier
+
+### INTEREST:
+
+This field represents the interest amount associated with each dossier in the ASEM system. It is used to track the interest accrued on the dossier over time, and is calculated based on the interest rate and calculation date associated with the dossier
 
 ## Keywords Highlighted
 
