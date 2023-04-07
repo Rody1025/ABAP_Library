@@ -34,19 +34,23 @@ In which:
 
 ### Dossier Number:
 
-The dossier number is assigned by a number range object. It is a unique identifier used to track and manage documents within the ASEM system.
-
-### Buchungskreis:
-
-The Buchungskreis, which is an element from financial accounting, is also stored in the ASEM/DOSSIER table. It is used to assign a document to a particular company code.
-
-### Status:
-
-The status field in the ASEM/DOSSIER table is a domain with a value range. It indicates the current status of the document, such as whether it is in draft, awaiting approval, or has been finalized.
+This field represents the unique identifier assigned to each dossier in the ASEM system. It is used to track and manage documents within the system.
 
 ### Doss_type:
 
-The doss_type field is a domain with a value table. It is used to classify documents according to their type, such as contracts, purchase orders, or invoices.
+This field is used to classify documents based on their type. It is a domain field that has a value table associated with it, which allows for consistent classification of documents across the system. Examples of document types that can be used in this field include contracts, purchase orders, or invoices.
+
+### COP: (Controlling Operating Post)
+
+This field represents the cost object associated with the dossier. The cost object is a component of the controlling module in SAP, which allows for tracking and management of costs associated with a particular activity or project.
+
+### BUKRS:
+
+This field represents the company code associated with the dossier. The company code is a key component of the finance module in SAP, which allows for tracking and management of financial transactions associated with a particular company.
+
+### CIRC: (Controlling Integrated Reporting Code)
+
+This field represents the circuit associated with the dossier. The circuit is a component of the logistics module in SAP, which allows for tracking and management of inventory and supply chain activities.
 
 ## Keywords Highlighted
 
