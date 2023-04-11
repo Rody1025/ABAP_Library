@@ -74,3 +74,9 @@ Use the keywords highlighted in the document to discuss the following key elemen
 - Nummernkreisobjekt (number range object)
 - Buchungskreis (company code)
 - Domäne mit Wertebereich bzw. Wertetabelle (domain with value range or value table)
+
+**Customer/Debtor**: They are the entity that receive service or goods. When they receive, they are also issuing an invoice. This invoice has a deadline and a specific amount that is claimed by the Creditor.
+The Debtor can be a person, company, or a legal entity.
+
+**Supplier/Creditor**: They are who provides service or goods. When they provide, they keep track of the amounts owed by their debtors in (Debitorenkontokorrent) which is a type of open-item accounting system.
+ If a Debtor does not pay their invoice by the payment deadline, the Creditor may issue payment reminders (Zahlungserinnerung) or dunning notices (Mahnung). A "Mahnung" sets the Debtor in default (Verzug) and triggers the calculation of interest on the overdue amount. If the payment deadline is not specified in the invoice (or in the contract), the date of the Mahnung becomes the reference date for calculating interest. It is also noted that a Betreibung, which refers to the legal process of debt collection, can be initiated even without a Mahnung.
