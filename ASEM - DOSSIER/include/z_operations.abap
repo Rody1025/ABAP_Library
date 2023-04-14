@@ -4,33 +4,31 @@
 
 CLASS Process_table DEFINITION.
   public section.
-    TYPES:  asem_dossier_table TYPE STANDARD TABLE OF /ASEM/DOSSIER.
 
     methods:
-      search_by_id importing
-                     id                      type /ASEM/DE_DOSSIER_NO
+      init_columns importing
                      value(col_header_table) type SLIS_T_FIELDCAT_ALV,
 
+      search_by_id importing
+                     id type /ASEM/DE_DOSSIER_NO,
+
       search_by_id_range importing
-                           low                     type /ASEM/DOSSIER-dossier
-                           high                    type /ASEM/DOSSIER-dossier
-                           row                     type i
-                           value(col_header_table) type SLIS_T_FIELDCAT_ALV,
+                           low  type /ASEM/DOSSIER-dossier
+                           high type /ASEM/DOSSIER-dossier,
 
       search_by_customer_id importing
-                              customer_id             type KUNNR
-                              row                     type i
-                              value(col_header_table) type SLIS_T_FIELDCAT_ALV,
+                              customer_id type KUNNR,
 
       search_by_creation_date importing
-                                input_year              type i
-                                row                     type i
-                                value(col_header_table) type SLIS_T_FIELDCAT_ALV,
+                                input_year type i,
 
       search_by_interest_year importing
-                                input_year              type i
-                                row                     type i
-                                value(col_header_table) type SLIS_T_FIELDCAT_ALV,
+                                input_year type i,
+
+      display_rows,
+
+      set_number_of_rows importing
+                           row type i,
 
       append_comment_header IMPORTING
                                       str                   TYPE string
@@ -51,24 +49,42 @@ CLASS Process_table DEFINITION.
                                 col_name                type string
                                 len                     type i
                       returning value(col_header_table) type SLIS_T_FIELDCAT_ALV,
+
       convert_date_to_YYYYMMDD importing
                                          input_year    type i
                                returning value(result) type String.
   protected section.
   private section.
-    DATA: comments      TYPE slis_listheader,
-          dossier_table TYPE STANDARD TABLE OF /ASEM/DOSSIER.
+    TYPES: asem_dossier_table TYPE STANDARD TABLE OF /ASEM/DOSSIER.
+
+    DATA: col_header_table type SLIS_T_FIELDCAT_ALV,
+          comments         TYPE slis_listheader,
+          dossier_table    TYPE STANDARD TABLE OF /ASEM/DOSSIER,
+          row              type I.
 
     methods:
       convert_number_to_YYYYMMDD importing
                                            input_year    type i
                                  returning value(result) type d,
       display_table importing
-                      value(col_header_table) type SLIS_T_FIELDCAT_ALV
-                      value(dossier_table)    type asem_dossier_table.
+                      value(dossier_table) type asem_dossier_table.
 endclass.
 
 CLASS Process_table implementation.
+  "********************************************************************************
+  "* Method: init_columns
+  "* Purpose: Initialize the columns header
+  "********************************************************************************
+  method init_columns.
+    me->col_header_table = col_header_table.
+  endmethod.
+  "********************************************************************************
+  "* Method: set_number_of_rows
+  "* Purpose: Initialize row variable
+  "********************************************************************************
+  method set_number_of_rows.
+    me->row = row.
+  endmethod.
   "********************************************************************************
   "* Method: search_by_id
   "* Purpose: Search by id
@@ -76,7 +92,7 @@ CLASS Process_table implementation.
   method search_by_id.
     SELECT * FROM /ASEM/DOSSIER
         WHERE DOSSIER = @id INTO TABLE @dossier_table.
-    display_table( col_header_table = col_header_table  dossier_table = dossier_table ).
+    display_table( dossier_table = dossier_table ).
   endmethod.
   "********************************************************************************
   "* Method: search_by_id_range
@@ -87,10 +103,10 @@ CLASS Process_table implementation.
             WHERE DOSSIER between @low and @high
             INTO TABLE @dossier_table
                 up to @row Rows.
-    display_table( col_header_table = col_header_table  dossier_table = dossier_table ).
+    display_table( dossier_table = dossier_table ).
   endmethod.
   "********************************************************************************
-  "* Private Method: search_by_customer_id
+  "* Method: search_by_customer_id
   "* Purpose: Search by customer id
   "********************************************************************************
   method search_by_customer_id.
@@ -98,10 +114,10 @@ CLASS Process_table implementation.
        WHERE KUNNR = @customer_id
        INTO TABLE @dossier_table
            up to @row Rows.
-    display_table( col_header_table = col_header_table  dossier_table = dossier_table ).
+    display_table( dossier_table = dossier_table ).
   endmethod.
   "********************************************************************************
-  "* Private Method: search_by_creation_date
+  "* Method: search_by_creation_date
   "* Purpose: Search by creation date
   "********************************************************************************
   method search_by_creation_date.
@@ -112,10 +128,10 @@ CLASS Process_table implementation.
        INTO TABLE @dossier_table
            up to @max_item Rows.
 
-    display_table( col_header_table = col_header_table  dossier_table = dossier_table ).
+    display_table(  dossier_table = dossier_table ).
   endmethod.
   "********************************************************************************
-  "* Private Method: search_by_interest_year
+  "* Method: search_by_interest_year
   "* Purpose: Search by customer id
   "********************************************************************************
   method search_by_interest_year.
@@ -126,7 +142,17 @@ CLASS Process_table implementation.
     INTO TABLE @dossier_table
         up to @max_item Rows.
 
-    display_table( col_header_table = col_header_table  dossier_table = dossier_table ).
+    display_table( dossier_table = dossier_table ).
+  endmethod.
+  "********************************************************************************
+  "* Method: display_rows
+  "* Purpose: Display based on number of rows
+  "********************************************************************************
+  method display_rows.
+    SELECT * FROM /ASEM/DOSSIER
+       INTO TABLE @dossier_table
+           up to @row Rows.
+    display_table( dossier_table = dossier_table ).
   endmethod.
   "********************************************************************************
   "* Private Method: display_table
