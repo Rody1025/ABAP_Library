@@ -10,7 +10,9 @@ This is a simple software that can manage the product inventory of a small onlin
 - [Cart System](#cart-system)
 - [Search Functionality](#search-functionality)
 - [Review System](#review-system)
+- [ALV Grid display](#alv_grid_display)
 - [Report Functionality](#report-functionality)
+- [Batch Input](#batch_input)
 
 ## Internal Table Structure
 
@@ -74,8 +76,13 @@ The system can be extended to include the following features:
 - Implement a form to display the reviews for a product.
 - Calculate and display the average rating for each product based on the reviews.
 
-## Report Functionality
+## ALV Grid display
 
-- Change the code to implement ALV to display the tables instead of the Write approach.
-- ALV: Change the code to implement ALV to display the tables instead of the Write approach.
-    
+- Instead of using the WRITE approach to display the products, users, cart contents, and reviews, implement ALV Grid display for a better user interface experience.
+
+## Report Functionality
+- Create a report that displays various information about the products in the internal table, 
+such as the total number of products, the number of products in each category, the average price of products, and so on.
+
+## Batch Input
+- Implement batch input functionality to allow for bulk uploading, and saving of products, users, or reviews from external files.
