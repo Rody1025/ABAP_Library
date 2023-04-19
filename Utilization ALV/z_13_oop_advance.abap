@@ -10,7 +10,7 @@ REPORT z_13_oop_advance.
 
 Include z_exercise_description.
 
-INCLUDE z_decleration.
+INCLUDE z_declaration.
 INCLUDE z_store.
 INCLUDE z_customer.
 INCLUDE z_cart.
