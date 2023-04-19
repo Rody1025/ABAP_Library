@@ -24,14 +24,15 @@ CLASS Store DEFINITION inheriting from Operations.
     CLASS-DATA: product_id_counter TYPE I VALUE 1.
     METHODS:
       add_product IMPORTING
-                    ID               TYPE I
-                    name             TYPE string
-                    desc             TYPE string
-                    category         TYPE string
-                    price            TYPE p
-                    production_date  TYPE String
-                    is_available     TYPE abap_bool
-                    is_available_str TYPE String default 'Available',
+                            ID               TYPE I
+                            name             TYPE string
+                            desc             TYPE string
+                            category         TYPE string
+                            price            TYPE p
+                            production_date  TYPE String
+                            is_available     TYPE abap_bool
+                            is_available_str TYPE String default 'Available'
+                  returning value(result)    type string,
 
       find_by_keyword IMPORTING
                         keyword TYPE string,
@@ -49,8 +50,16 @@ CLASS Store DEFINITION inheriting from Operations.
       delete_by_id IMPORTING
                      ID TYPE I,
       find_product_by_date IMPORTING
-                             input_str TYPE STring,
+                             input_str TYPE String,
 
+      check_file_table_length importing
+                                        file_path  type String
+                                        value(tab) like Inventory
+                              returning value(len) type I,
+
+      save_to_file redefinition,
+      load_from_file redefinition,
+      update_id_before_loading redefinition,
       init_ALV_columns redefinition,
       free_tables redefinition,
       display_table redefinition,
@@ -79,7 +88,8 @@ CLASS store IMPLEMENTATION.
 
   "********************************************************************************
   "* Method: add_product
-  "* Purpose: Add product to the Inventory
+  "* Purpose: Adds a new product to the inventory if a similar product with the same ID does not already exist.
+  "*          The product details are provided as input parameters to the method.
   "********************************************************************************
   METHOD add_product.
     DATA(exists) = check_if_exist( ID = ID ).
@@ -92,25 +102,28 @@ CLASS store IMPLEMENTATION.
                                 production_date = date
                                 is_available = is_available
                                 is_available_str = 'Available' ).
-    if is_available = abap_false.
-      product_instance-is_available_str = 'Not Available'.
-    endif.
 
-    IF get_table_length( Inventory ) > 1.
-      IF exists = abap_true.
+    if get_table_length( Inventory ) >= 1.
+      if is_available = abap_false.
+        product_instance-is_available_str = 'Not Available'.
+      endif.
+      if exists = abap_true.
         APPEND LINES OF append_comment_italic( 'A similar product with the same ID (' && ID &&  ') already exists') to comments_table.
+        result = 'A similar product with the same ID (' && ID &&  ') already exists'.
       ELSE.
         INSERT product_instance INTO TABLE Inventory.
         product_id_counter = product_id_counter + 1.
+        result = 'Itme has been inserted. You have (' && get_table_length( Inventory ) && ') items' .
       ENDIF.
-    ELSE.
+    else.
       INSERT product_instance INTO TABLE Inventory.
       product_id_counter = product_id_counter + 1.
-    ENDIF.
+      result = 'Itme has been inserted. You have (' && exists && get_table_length( Inventory ) && ') items' .
+    endif.
   ENDMETHOD.
   "********************************************************************************
   "* Method: init_ALV_columns
-  "* Purpose: Initialize the table headers
+  "* Purpose: initializes the table headers for displaying the inventory using ALV (ABAP List Viewer).
   "********************************************************************************
   method init_ALV_columns.
     APPEND LINES OF init_ALV_column( pos = 1 header = 'product_id' col_name = 'Id' len = 2 ) to col_header_table.
@@ -122,8 +135,10 @@ CLASS store IMPLEMENTATION.
     APPEND LINES OF init_ALV_column( pos = 6 header = 'desc' col_name = 'Description' len = 60 ) to col_header_table.
   endmethod.
   "********************************************************************************
-  "* Method: ALV_show_table
-  "* Purpose: write comments
+  "* Method:  display_table
+  "* Purpose: Displays the inventory table using ALV.
+  "*          If the input parameter "is_initial" is true, the method first adds comments to the comments table indicating
+  "*           the total number of products and the date and time of the display.
   "********************************************************************************
   method display_table.
     if is_inital = abap_true.
@@ -152,7 +167,8 @@ CLASS store IMPLEMENTATION.
   endmethod.
   "********************************************************************************
   "* Method: find_by_keyword
-  "* Purpose: Find product by keyword
+  "* Purpose: Finds products in the inventory that match a keyword provided as input.
+  "*          The keyword can be either a name or a category.
   "********************************************************************************
   METHOD find_by_keyword.
     DATA: tmp_table like Inventory.
@@ -179,8 +195,8 @@ CLASS store IMPLEMENTATION.
     display_table( is_inital = abap_false table = tmp_table ).
   ENDMETHOD.
   "********************************************************************************
-  "* Method: find_by_price_range
-  "* Purpose: Find products by a price range
+  "* Method:   find_by_price_range
+  "* Purpose:  Finds products in the inventory that fall within a price range provided as input.
   "********************************************************************************
   METHOD find_by_price_range.
     APPEND LINES OF append_comment_pair( key = 'Find by Price range' value = '' && start && '-' && end ) to comments_table.
@@ -195,7 +211,7 @@ CLASS store IMPLEMENTATION.
   ENDMETHOD.
   "********************************************************************************
   "* Method: update_availability_by_id
-  "* Purpose: Update the availability of a product by its id
+  "* Purpose: Updates the availability status of a product with a given ID to available
   "********************************************************************************
   METHOD update_availability_by_id.
     APPEND LINES OF append_comment_italic( 'UPDATE Inventory set is_available = true where id =' && ID ) to comments_table.
@@ -211,7 +227,8 @@ CLASS store IMPLEMENTATION.
   ENDMETHOD.
   "********************************************************************************
   "* Method: update_availability_by_keyword
-  "* Purpose: Update the availability of a product by keyword
+  "* Purpose: Updates the availability status of products that match a keyword provided as input to available.
+  "*          The keyword can be either a name or a category
   "********************************************************************************
   METHOD update_availability_by_keyword.
     APPEND LINES OF append_comment_italic( 'UPDATE Inventory set is_available = true where') to comments_table.
@@ -228,7 +245,8 @@ CLASS store IMPLEMENTATION.
   ENDMETHOD.
   "********************************************************************************
   "* Method: find_product_by_date
-  "* Purpose: Find all Products of a certain age
+  "* Purpose:  Finds products in the inventory that were produced a certain number of years ago,
+  "*           where the number of years is provided as input
   "********************************************************************************
   method find_product_by_date.
     DATA: words           TYPE standard table of String,
@@ -259,7 +277,7 @@ CLASS store IMPLEMENTATION.
   endmethod.
   "********************************************************************************
   "* Method: delete_by_id
-  "* Purpose: Delete product form the Inventory
+  "* Purpose: Deletes a product from the inventory with a given ID
   "********************************************************************************
   METHOD delete_by_id.
     APPEND LINES OF append_comment_italic( 'Delete 1 from Inventory where product_id = ' && ID ) to comments_table.
@@ -277,8 +295,10 @@ CLASS store IMPLEMENTATION.
   ENDMETHOD.
   "********************************************************************************
   "* Method: generate_report
-  "* Purpose: Generate a report for product, displaying total number of P, number of
-  "* P in each category, average price of products...
+  "* Purpose: Generates a report on the inventory, displaying the total number of products,
+  "*           the number of products in each category, the average price of products in each category,
+  "*           and the total price of products in each category. The method uses a temporary table to store
+  "*           the report data and displays the report using ALV.
   "********************************************************************************
   method generate_report.
     free comments_table.
@@ -331,8 +351,100 @@ CLASS store IMPLEMENTATION.
 
   endmethod.
   "********************************************************************************
+  "* Method: save_in_file
+  "* Purpose: Saving the table content to a file in user-given path
+  "********************************************************************************
+  method save_to_file.
+    if get_table_length( Inventory ) > 0.
+      CALL FUNCTION 'GUI_DOWNLOAD'
+        EXPORTING
+          filename              = file_path
+          filetype              = 'DAT' " File type either ASC or ASCII
+          write_field_separator = 'X'     " Whether or not to include field separators in the file.
+        TABLES
+          data_tab              = Inventory.
+
+      IF sy-subrc <> 0.
+        MESSAGE 'Error downloading file' TYPE 'E'.
+      ENDIF.
+    endif.
+  endmethod.
+  "********************************************************************************
+  "* Method: load_from_file
+  "* Purpose: Load from file
+  "********************************************************************************
+  method load_from_file.
+    Data(inserted_item_table) = Inventory.
+    CALL FUNCTION 'GUI_UPLOAD'
+      EXPORTING
+        filename                = file_path
+        filetype                = 'DAT'
+        has_field_separator     = ' '
+      TABLES
+        data_tab                = Inventory
+      EXCEPTIONS
+        file_open_error         = 1
+        file_read_error         = 2
+        no_batch                = 3
+        gui_refuse_filetransfer = 4
+        invalid_type            = 5
+        no_authority            = 6
+        unknown_error           = 7
+        bad_data_format         = 8
+        header_not_allowed      = 9
+        separator_not_allowed   = 10
+        table_not_supported     = 11
+        table_without_header    = 12
+        empty_file              = 13
+        dp_error_create         = 14
+        dp_error_send           = 15
+        dp_error_write          = 16
+        unknown_dp_error        = 17
+        access_denied           = 18
+        dp_out_of_memory        = 19
+        disk_full               = 20
+        dp_timeout              = 21
+        file_not_found          = 22
+        dataprovider_exception  = 23
+        control_flush_error     = 24.
+    " Add the inserted items
+    APPEND LINES OF inserted_item_table TO Inventory.
+    IF sy-subrc <> 0.
+      MESSAGE 'Error uploading file. Error code :' && sy-subrc TYPE 'E'.
+    ENDIF.
+  endmethod.
+  "********************************************************************************
+  "* Private Method:update_id_before_loading
+  "* Purpose: Updates id of inserted products, before loading products from the file
+  "********************************************************************************
+  method update_id_before_loading.
+    DATA: tmp TYPE TABLE OF Product.
+    Store=>product_id_counter = check_file_table_length( tab = tmp file_path = file_path ).
+    Data(counter) = 1.
+    Loop at Inventory reference into ref_product_instnace.
+      ref_product_instnace->product_id = Store=>product_id_counter + counter.
+      counter = counter + 1.
+    endloop.
+  endmethod.
+  "********************************************************************************
+  "* Private Method:check_file_table_lengthdisplay_single_row
+  "* Purpose: Check how many products are in the file, to adjust the id's
+  "********************************************************************************
+  method check_file_table_length.
+    CALL FUNCTION 'GUI_UPLOAD'
+      EXPORTING
+        filename            = file_path
+        filetype            = 'DAT'
+        has_field_separator = ' '
+      TABLES
+        data_tab            = tab.
+
+    len = lines( tab ).
+  endmethod.
+  "********************************************************************************
   "* Private Method: display_single_row
-  "* Purpose: Display the coloring to avoid code duplication
+  "* Purpose: Private method used to format a single row of the inventory table for display.
+  "*          The method concatenates the product ID, price, name, category, and availability status into a single string
   "********************************************************************************
   METHOD display_single_row.
     DATA: is_available TYPE string.
@@ -348,7 +460,7 @@ CLASS store IMPLEMENTATION.
   ENDMETHOD.
   "********************************************************************************
   "* Private Method: free_tables
-  "* Purpose: Freeing the tables before next process begin
+  "* Purpose: Private method used to free the comments table and column header table before the next process begins.
   "********************************************************************************
   method free_tables.
     FREE comments_table.
@@ -356,10 +468,15 @@ CLASS store IMPLEMENTATION.
   endmethod.
   "********************************************************************************
   "* Private Method: check_if_exists
-  "* Purpose: check if the item exists, this is based on its ID
+  "* Purpose: Private method used to check if a product with a given ID already exists in the inventory.
+  "*          The method returns true if the product exists and false otherwise.
   "********************************************************************************
   METHOD check_if_exist.
     READ TABLE inventory INTO product_instance WITH KEY product_id = ID.
-    is_exists = sy-subrc = 0.
+    if sy-subrc = 0.
+      is_exists = abap_true.
+    else.
+      is_exists = abap_false.
+    endif.
   ENDMETHOD.
 ENDCLASS.

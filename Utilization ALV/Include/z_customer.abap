@@ -11,13 +11,14 @@ CLASS User DEFINITION inheriting from Operations.
 
     METHODS:
       add_customer    IMPORTING
-                        ID            TYPE I
-                        name          TYPE string
-                        email         TYPE string
-                        password      TYPE string
-                        premium       TYPE abap_bool DEFAULT abap_false
-                        flag          TYPE abap_bool DEFAULT abap_false
-                        flag_comments TYPE string DEFAULT '',
+                                ID            TYPE I
+                                name          TYPE string
+                                email         TYPE string
+                                password      TYPE string
+                                premium       TYPE abap_bool DEFAULT abap_false
+                                flag          TYPE abap_bool DEFAULT abap_false
+                                flag_comments TYPE string DEFAULT ''
+                      returning value(result) type string,
 
       update_customer  IMPORTING
                          ID            TYPE I
@@ -36,6 +37,14 @@ CLASS User DEFINITION inheriting from Operations.
       delete_cusomter    IMPORTING
                            ID TYPE I,
 
+      check_file_table_length importing
+                                        file_path  type String
+                                        value(tab) like Customer
+                              returning value(len) type I,
+
+      save_to_file redefinition,
+      load_from_file redefinition,
+      update_id_before_loading redefinition,
       init_ALV_columns redefinition,
       free_tables redefinition,
       check_if_exist redefinition,
@@ -60,7 +69,8 @@ CLASS User IMPLEMENTATION.
   METHOD add_customer.
     customer_instance = VALUE #( customer_id = ID
                                  name = name
-                                 email = email password = password
+                                 email = email
+                                 password = password
                                  premium = premium
                                  premium_str = 'NA'
                                  flag = flag
@@ -75,6 +85,8 @@ CLASS User IMPLEMENTATION.
 
     INSERT customer_instance INTO TABLE Customer.
     customer_id_counter = customer_id_counter + 1.
+    result = 'Itme has been inserted. You have (' && get_table_length( Customer ) && ') items' .
+
   ENDMETHOD.
   "********************************************************************************
   "* Method: init_ALV_columns
@@ -196,6 +208,98 @@ CLASS User IMPLEMENTATION.
     APPEND LINES OF append_comment_italic( 'Table after processing' ) to comments_table.
     display_table( is_inital = abap_false table = tmp_table ).
   ENDMETHOD.
+  "********************************************************************************
+  "* Method: save_in_file
+  "* Purpose: Saving the table content to a file in user-given path
+  "********************************************************************************
+  method save_to_file.
+    if get_table_length( Customer ) > 0.
+      CALL FUNCTION 'GUI_DOWNLOAD'
+        EXPORTING
+          filename              = file_path
+          filetype              = 'ASC' " File type either ASC or ASCII
+          write_field_separator = 'X'     " Whether or not to include field separators in the file.
+        TABLES
+          data_tab              = Customer.
+
+      IF sy-subrc <> 0.
+        MESSAGE 'Error downloading file' TYPE 'E'.
+      ENDIF.
+    endif.
+  endmethod.
+  "********************************************************************************
+  "* Private Method: load_from_file
+  "* Purpose: Load Customer from a file
+  "********************************************************************************
+  method load_from_file.
+    Data(inserted_item_table) = Customer.
+    CALL FUNCTION 'GUI_UPLOAD'
+      EXPORTING
+        filename                = file_path
+        filetype                = 'DAT'
+        has_field_separator     = ' '
+      TABLES
+        data_tab                = Customer
+      EXCEPTIONS
+        file_open_error         = 1
+        file_read_error         = 2
+        no_batch                = 3
+        gui_refuse_filetransfer = 4
+        invalid_type            = 5
+        no_authority            = 6
+        unknown_error           = 7
+        bad_data_format         = 8
+        header_not_allowed      = 9
+        separator_not_allowed   = 10
+        table_not_supported     = 11
+        table_without_header    = 12
+        empty_file              = 13
+        dp_error_create         = 14
+        dp_error_send           = 15
+        dp_error_write          = 16
+        unknown_dp_error        = 17
+        access_denied           = 18
+        dp_out_of_memory        = 19
+        disk_full               = 20
+        dp_timeout              = 21
+        file_not_found          = 22
+        dataprovider_exception  = 23
+        control_flush_error     = 24.
+    " Add the inserted items
+    APPEND LINES OF inserted_item_table TO Customer.
+    IF sy-subrc <> 0.
+      MESSAGE 'Error uploading file. Error code :' && sy-subrc TYPE 'E'.
+    ENDIF.
+  endmethod.
+  "********************************************************************************
+  "* Private Method: update_id_before_loading
+  "* Purpose: Update id before loading from a file to avoid data-lost
+  "********************************************************************************
+  method update_id_before_loading.
+    DATA: tmp TYPE TABLE OF User_struct.
+    User=>customer_id_counter = check_file_table_length( tab = tmp file_path = file_path ).
+    Data(counter) = 1.
+    Loop at Customer reference into ref_customer_instance.
+      ref_customer_instance->customer_id = User=>customer_id_counter + counter.
+      counter = counter + 1.
+    endloop.
+  endmethod.
+  "********************************************************************************
+  "* Private Method:check_file_table_lengthdisplay_single_row
+  "* Purpose: Check how many products are in the file, to adjust the id's
+  "********************************************************************************
+  method check_file_table_length.
+    CALL FUNCTION 'GUI_UPLOAD'
+      EXPORTING
+        filename            = file_path
+        filetype            = 'DAT'
+        has_field_separator = ' '
+      TABLES
+        data_tab            = tab.
+
+    len = lines( tab ).
+  endmethod.
+  "**********
   "********************************************************************************
   "* Private Method: display_single_row
   "* Purpose: Display single Customer

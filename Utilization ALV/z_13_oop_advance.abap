@@ -65,19 +65,350 @@
 "     price of products, and so on. You can use ABAP function modules like
 "     REUSE_ALV_GRID_DISPLAY or SALV_TABLE to display the report output
 
+" 7) Batch Input
+"     Implement batch input functionality to allow for bulk uploading of products, users, or reviews from
+"      external files.
+
 REPORT z_13_oop_advance.
 
 INCLUDE z_decleration.
-Include z_store.
-Include z_customer.
-Include z_cart.
-Include z_review.
+INCLUDE z_store.
+INCLUDE z_customer.
+INCLUDE z_cart.
+INCLUDE z_review.
+
+DATA: gamestore_path          type String value 'C:\Library Data\gamestore_Products.txt',
+      gamestore_customer_path type String value 'C:\Library Data\gamestore_Customers.txt',
+      gamestore_cart_path     type String value 'C:\Library Data\gamestore_cart.txt',
+      gamestore_reviews_path  type String value 'C:\Library Data\gamestore_reviews.txt',
+
+      import_default_products type abap_bool value abap_false,
+      import_default_customer type abap_bool value abap_false,
+      check_store             type abap_bool value abap_false,
+      check_customer          type abap_bool value abap_false,
+      check_customer_cart     type abap_bool value abap_false,
+      check_customer_reviews  type abap_bool value abap_false.
+
+DATA: gamestore          TYPE REF TO Store,
+      gamestore_customer TYPE REF TO User.
+
+PARAMETERS: prodID   TYPE i,
+            customID TYPE i.
+
+SELECTION-screen begin of block b_header with FRAME title b_header.
+
+SELECTION-screen begin of block b_prodct with FRAME title b_prodct.
+
+SELECTION-SCREEN BEGIN OF LINE.
+parameters: import1 as checkbox.
+SELECTION-SCREEN COMMENT 4(50) _import1.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _ID.
+parameters: ID type Product-product_id default Store=>product_id_counter.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _name.
+parameters: name type Product-name.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _desc.
+parameters: desc type Product-desc.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _catgory.
+parameters: category type Product-category.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _price.
+parameters: price type Product-price.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _date.
+parameters: pod_date type Product-production_date.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _ava.
+parameters: is_ava type Product-is_available as checkbox.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN PUSHBUTTON /1(10) insrt_bt USER-COMMAND pushbutton1.
+SELECTION-SCREEN PUSHBUTTON /1(10) clear_bt USER-COMMAND pushbutton2.
+
+SELECTION-screen end of block b_prodct.
+
+SELECTION-screen begin of block b_custm with FRAME title b_custm.
+
+SELECTION-SCREEN BEGIN OF LINE.
+parameters: import2 as checkbox.
+SELECTION-SCREEN COMMENT 4(50) _import2.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _ID2.
+parameters: id2 type User_struct-customer_id default User=>customer_id_counter.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _name2.
+parameters: name2 type User_struct-name.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _email.
+parameters: email type User_struct-email.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _pass.
+parameters: password type User_struct-password.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _premium.
+parameters: premium type User_struct-premium as checkbox.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _flag.
+parameters: flag type User_struct-flag as checkbox.
+SELECTION-SCREEN END OF LINE..
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _comment.
+parameters: comment type User_struct-flag_comments.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN PUSHBUTTON /1(10) insrt_t2 USER-COMMAND pushbutton3.
+SELECTION-SCREEN PUSHBUTTON /1(10) clear_t2 USER-COMMAND pushbutton4.
+
+SELECTION-screen end of block b_custm.
+
+SELECTION-screen begin of block extern with FRAME title extern.
+
+SELECTION-screen begin of block b_first with FRAME title b_first.
+SELECTION-SCREEN BEGIN OF LINE.
+parameters: ch_store as checkbox.
+SELECTION-SCREEN COMMENT 4(60) _store.
+SELECTION-SCREEN END OF LINE.
+SELECTION-screen end of block b_first.
+
+SELECTION-screen begin of block b_secon with FRAME title b_secon.
+SELECTION-SCREEN BEGIN OF LINE.
+parameters: ch_cust as checkbox.
+SELECTION-SCREEN COMMENT 4(60) _cust.
+SELECTION-SCREEN END OF LINE.
+SELECTION-screen end of block b_secon.
+
+SELECTION-screen begin of block b_third with FRAME title b_third.
+SELECTION-SCREEN BEGIN OF LINE.
+parameters: ch_cart as checkbox.
+SELECTION-SCREEN COMMENT 4(60) _cart.
+SELECTION-SCREEN END OF LINE.
+SELECTION-screen end of block b_third.
+
+SELECTION-screen begin of block b_forth with FRAME title b_forth.
+SELECTION-SCREEN BEGIN OF LINE.
+parameters: ch_reviw as checkbox.
+SELECTION-SCREEN COMMENT 4(60) _review .
+SELECTION-SCREEN END OF LINE.
+SELECTION-screen end of block b_forth.
+SELECTION-screen end of block extern.
+
+SELECTION-screen end of block b_header.
+
+AT SELECTION-SCREEN OUTPUT.
+  " User can't change this field
+  LOOP AT SCREEN.
+    IF screen-name = 'ID' or screen-name = 'ID2'.
+      screen-input = '0'.
+      MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+  " We can add a specific filter to an input
+  "AT SELECTION-SCREEN ON VALUE-REQUEST FOR pod_date.
+
+  " Checking if the user want to import from file or not
+  IF ch_store  = abap_true.
+    check_store = abap_true.
+  ENDIF.
+  IF ch_cust  = abap_true.
+    check_customer = abap_true.
+  ENDIF.
+  IF ch_cart  = abap_true.
+    check_customer_cart = abap_true.
+  ENDIF.
+  IF ch_reviw  = abap_true.
+    check_customer_reviews = abap_true.
+  ENDIF.
+
+AT SELECTION-SCREEN.
+  " Check if the user want to import from file or the predefined data
+  if import1 = abap_true.
+    if ch_store = abap_true.
+      MESSAGE 'Note! you have imported Products from the file and the pre-defined Products' TYPE 'I'.
+    endif.
+    import_default_products = abap_true.
+  else.
+    import_default_products = abap_false.
+  endif.
+
+  " Check if the user want to import from file or the predefined data
+  if import2 = abap_true.
+    if ch_cust = abap_true.
+      MESSAGE 'Note! you have imported Customers from the file and the pre-defined Customers' TYPE 'I'.
+    endif.
+    import_default_customer = abap_true.
+  else.
+    import_default_customer = abap_false.
+  endif.
+
+  " Handler Products
+  IF sy-ucomm = 'PUSHBUTTON1'.
+    DATA(date_to_str) = pod_date(4) && '/' && pod_date+4(2) && '/' && pod_date+6(2).
+
+    gamestore = NEW Store(  ).
+    if name is not initial or category is not initial.
+      DATA(inventory_len) = gamestore->add_product(
+                                              ID = Store=>product_id_counter
+                                              name = name
+                                              desc = desc
+                                              category = category
+                                              price = price
+                                              production_date = date_to_str
+                                              is_available = is_ava ).
+      MESSAGE 'Result :' && inventory_len TYPE 'I'.
+      " After adding a user, set the Id parameter to the newly incremented ID
+      ID = Store=>product_id_counter.
+    else.
+      MESSAGE 'ID cant be empty!' TYPE 'I'.
+    endif.
+
+    " Handler Customer
+  elseif sy-ucomm = 'PUSHBUTTON2'.
+    CLEAR name.
+    CLEAR desc.
+    CLEAR category.
+    CLEAR price.
+    CLEAR pod_date.
+    CLEAR is_ava.
+  ENDIF.
+
+  IF sy-ucomm = 'PUSHBUTTON3'.
+    gamestore_customer = NEW User(  ).
+
+    if name2 is not initial or password is not initial.
+      DATA(customer_len) = gamestore_customer->add_customer(
+                                              ID = User=>customer_id_counter
+                                              name = name2
+                                              email = email
+                                              password = password
+                                              premium = premium
+                                              flag = flag
+                                              flag_comments = comment ).
+      MESSAGE 'Result :' && customer_len TYPE 'I'.
+      " After adding a user, set the Id parameter to the newly incremented ID
+      ID2 = User=>customer_id_counter.
+    else.
+      MESSAGE 'ID cant be empty!' TYPE 'I'.
+    endif.
+
+  elseif sy-ucomm = 'PUSHBUTTON4'.
+    CLEAR name2.
+    CLEAR email.
+    CLEAR password.
+    CLEAR premium.
+    CLEAR flag.
+    CLEAR comment.
+  ENDIF.
+
+initialization.
+  b_header = `A real gamestore simulation`.
+
+  b_prodct = `Insert a product into Product table`.
+  _import1 = `Import pre-defined products!`.
+  _ID = `ID`.
+  _name = `Name`.
+  _desc = `Description`.
+  _catgory = `Category`.
+  _price = `Price`.
+  _date = `Date`.
+  _ava = `Availability`.
+  insrt_bt = `Insert`.
+  clear_bt = `Clear`.
+
+  b_custm = 'Insert Customer into Customer table'.
+  _import2 = 'Import pre-defined Customers'.
+  _id2 = 'ID'.
+  _name2 = 'Name'.
+  _email = 'Email'.
+  _pass = 'Password'.
+  _premium = 'Premium User'.
+  _flag = 'Suspicious Account'.
+  _comment = 'Comments'.
+  insrt_t2 = `Insert`.
+  clear_t2 = `Clear`.
+
+  extern = `Import Data from extern files`.
+  b_first = `Products`.
+  b_secon = `Customer List`.
+  b_third = `Customers cart`.
+  b_forth = `Customer Reviews`.
+
+  _store = `Found!, want to import them?`.
+  _cust = `Found!, want to import them?`.
+  _cart = `Found!, want to import them?`.
+  _review = `Found!, want to import them?`.
+
+  perform check_file_existence using gamestore_path changing check_store.
+  perform check_file_existence using gamestore_customer_path changing check_customer.
+  perform check_file_existence using gamestore_cart_path changing check_customer_cart.
+  perform check_file_existence using gamestore_reviews_path changing check_customer_reviews.
+
+  if check_store = abap_false.
+    _store = `No external file was found!`.
+  endif.
+  if check_customer = abap_false.
+    _cust = `No external file was found!`.
+    _cart = `No external file was found!`.
+    _review = `No external file was found!`.
+  else.
+    if check_customer_cart = abap_false.
+      _cart = `No external file was found!`.
+      _review = `No external file was found!`.
+    else.
+      if check_customer_reviews = abap_false.
+        _review = `No external file was found!`.
+      endif.
+    endif.
+  endif.
+  " Setting the boolean values to their initialize state
+  check_store = abap_false.
+  check_customer = abap_false.
+  check_customer_cart = abap_false.
+  check_customer_reviews = abap_false.
 
 START-OF-SELECTION.
 
-  DATA: gamestore TYPE REF TO Store.
   gamestore = NEW Store(  ).
-  perform populate_store_with_products.
+  " Check if Checkboxs are checked
+  if ch_store = abap_true.
+    " Before importing data, change the id of the already inserted products, to avoid data-lost
+    gamestore->update_id_before_loading( gamestore_path ).
+    gamestore->load_from_file( gamestore_path ).
+  endif.
+  if import_default_products = abap_true.
+    Store=>product_id_counter = LINES( Inventory ) + 1.
+    perform populate_store_with_products.
+  endif.
+  gamestore->save_to_file( gamestore_path ).
 
   gamestore->init_ALV_columns(  ).
   gamestore->display_table( is_inital = abap_true ).
@@ -93,10 +424,18 @@ START-OF-SELECTION.
 
   gamestore->generate_report(  ).
   gamestore->free_tables(  ).
+  gamestore->save_to_file( gamestore_path  ).
 **********************************************************************
-  DATA: gamestore_customer TYPE REF TO User.
   gamestore_customer = NEW User(  ).
-  perform populate_store_with_customers.
+  if ch_cust = abap_true.
+    gamestore_customer->update_id_before_loading( gamestore_customer_path ).
+    gamestore_customer->load_from_file( gamestore_customer_path ).
+  endif.
+  if import_default_customer = abap_true.
+    User=>customer_id_counter = LINES( Customer ) + 1.
+    perform populate_store_with_customers.
+  endif.
+  gamestore_customer->save_to_file( gamestore_customer_path ).
 
   gamestore_customer->init_ALV_columns(  ).
   gamestore_customer->display_table( is_inital = abap_true ).
@@ -113,9 +452,19 @@ START-OF-SELECTION.
   gamestore_customer->delete_cusomter( 11 ).
   gamestore_customer->find_all_flagged(  ).
   gamestore_customer->free_tables(  ).
+  gamestore_customer->save_to_file( gamestore_customer_path ).
 **********************************************************************
   DATA: gamestore_customer_cart TYPE REF TO Cart.
   gamestore_customer_cart = NEW Cart(  ).
+
+  " Populate the table (if no items were inserted) before processing to the cart
+  if lines( Inventory ) < 0.
+    perform populate_store_with_products.
+  endif.
+  if lines( Customer ) < 0.
+    perform populate_store_with_customers.
+  endif.
+
   perform populate_customer_cart.
 
   gamestore_customer_cart->init_ALV_columns(  ).
@@ -154,12 +503,36 @@ START-OF-SELECTION.
   gamestore_customer_review->update_review( review_id = 8 review = 'This has been edited!' rating = 5  ).
   gamestore_customer_review->delete_review( 50 ).
   gamestore_customer_review->cal_average_rating( ).
+  "********************************************************************************
+  "* Class: Populate check_file_existence
+  "* Purpose: Check the existence of a file
+  "********************************************************************************
+FORM check_file_existence
+  USING file_path TYPE string
+  CHANGING is_exist TYPE abap_bool.
 
-  "********************************************************************************
-  "* Class: Populate subroutines
-  "* Purpose: The below subroutines are used to populate the table with
-  "* Store product, members, customer carts, and customers reviews
-  "********************************************************************************
+  TRY.
+      CALL METHOD cl_gui_frontend_services=>file_exist
+        EXPORTING
+          file                 = file_path
+        RECEIVING
+          result               = is_exist
+        EXCEPTIONS
+          cntl_error           = 1
+          error_no_gui         = 2
+          wrong_parameter      = 3
+          not_supported_by_gui = 4
+          OTHERS               = 5.
+
+    CATCH cx_root INTO DATA(e).
+      WRITE: / 'Error: ', e->get_text( ).
+  ENDTRY.
+ENDFORM.
+"********************************************************************************
+"* Class: Populate subroutines
+"* Purpose: The below subroutines are used to populate the table with
+"* Store product, members, customer carts, and customers reviews
+"********************************************************************************
 form populate_store_with_products.
   gamestore->add_product( ID = Store=>product_id_counter name = 'PlayStation 5' desc = 'The latest gaming console from Sony'
   category = 'Consoles' price = '499.99' production_date = '2020/11/12' is_available = abap_true ).
