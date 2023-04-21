@@ -1,13 +1,27 @@
 *&---------------------------------------------------------------------*
 *&  Include  z_selection_screen
 *&---------------------------------------------------------------------*
+form is_checkbox_enabled using
+                             name type String
+                             boolean type abap_bool.
+  if screen-name = name and boolean = abap_false.
+    screen-active = '0'.
+    MODIFY SCREEN.
+  endif.
+endform.
+
 AT SELECTION-SCREEN OUTPUT.
+
   " User can't change this field
   LOOP AT SCREEN.
-    IF screen-name = 'ID' or screen-name = 'ID2'.
+    IF screen-name = 'ID' or screen-name = 'ID2' or screen-name = 'TODO'.
       screen-input = '0'.
       MODIFY SCREEN.
     ENDIF.
+    perform is_checkbox_enabled using 'CH_STORE' check_store.
+    perform is_checkbox_enabled using 'CH_CUST' check_customer.
+    perform is_checkbox_enabled using 'CH_CART' check_customer_cart.
+    perform is_checkbox_enabled using 'CH_REVIW' check_customer_reviews.
   ENDLOOP.
   " We can add a specific filter to an input
   "AT SELECTION-SCREEN ON VALUE-REQUEST FOR pod_date.
@@ -26,26 +40,29 @@ AT SELECTION-SCREEN OUTPUT.
     check_customer_reviews = abap_true.
   ENDIF.
 
-AT SELECTION-SCREEN.
   " Check if the user want to import from file or the predefined data
   if import1 = abap_true.
-    if ch_store = abap_true.
-      MESSAGE 'Note! you have imported Products from the file and the pre-defined Products' TYPE 'I'.
-    endif.
     import_default_products = abap_true.
-  else.
-    import_default_products = abap_false.
   endif.
 
-  " Check if the user want to import from file or the predefined data
   if import2 = abap_true.
-    if ch_cust = abap_true.
-      MESSAGE 'Note! you have imported Customers from the file and the pre-defined Customers' TYPE 'I'.
-    endif.
     import_default_customer = abap_true.
-  else.
-    import_default_customer = abap_false.
   endif.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR pod_date.
+
+AT SELECTION-SCREEN.
+  IF sy-ucomm = 'IMPORT_PRODUCT_DATA'.
+    CALL SELECTION-SCREEN 100 STARTING AT 30 5.
+  ENDIF.
+
+  IF sy-ucomm = 'IMPORT_CUSTOMER_DATA'.
+    CALL SELECTION-SCREEN 200 STARTING AT 30 5.
+  ENDIF.
+
+  IF sy-ucomm = 'TODO'.
+    CALL SELECTION-SCREEN 300 STARTING AT 30 5.
+  ENDIF.
 
   " Handler Products
   IF sy-ucomm = 'PUSHBUTTON1'.
@@ -64,6 +81,7 @@ AT SELECTION-SCREEN.
       MESSAGE 'Result :' && inventory_len TYPE 'I'.
       " After adding a user, set the Id parameter to the newly incremented ID
       ID = Store=>product_id_counter.
+
     else.
       MESSAGE 'ID cant be empty!' TYPE 'I'.
     endif.

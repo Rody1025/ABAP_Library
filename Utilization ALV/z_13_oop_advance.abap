@@ -8,9 +8,7 @@
 
 REPORT z_13_oop_advance.
 
-Include z_exercise_description.
-
-INCLUDE z_declaration.
+INCLUDE z_decleration.
 INCLUDE z_store.
 INCLUDE z_customer.
 INCLUDE z_cart.
@@ -38,7 +36,6 @@ include z_selection_screen.
 include z_initialization.
 
 START-OF-SELECTION.
-
   gamestore = NEW Store(  ).
   " Check if Checkboxs are checked
   if ch_store = abap_true.

@@ -1,17 +1,42 @@
 *&---------------------------------------------------------------------*
 *&  Include  z_parameters
 *&---------------------------------------------------------------------*
-PARAMETERS: prodID   TYPE i,
-            customID TYPE i.
-
-SELECTION-screen begin of block b_header with FRAME title b_header.
-
-SELECTION-screen begin of block b_prodct with FRAME title b_prodct.
-
+SELECTION-SCREEN BEGIN OF SCREEN 100 TITLE popup.
 SELECTION-SCREEN BEGIN OF LINE.
 parameters: import1 as checkbox.
 SELECTION-SCREEN COMMENT 4(50) _import1.
 SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+parameters: ch_store as checkbox.
+SELECTION-SCREEN COMMENT 4(60) _store.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF SCREEN 100.
+
+SELECTION-SCREEN BEGIN OF SCREEN 200 TITLE popup2.
+SELECTION-SCREEN BEGIN OF LINE.
+parameters: import2 as checkbox.
+SELECTION-SCREEN COMMENT 4(50) _import2.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN BEGIN OF LINE.
+parameters: ch_cust as checkbox.
+SELECTION-SCREEN COMMENT 4(60) _cust.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF SCREEN 200.
+
+SELECTION-SCREEN BEGIN OF SCREEN 300 TITLE popup3.
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN COMMENT 4(12) _todo.
+parameters: todo type String default 'To be Implemented'.
+SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF SCREEN 300.
+
+SELECTION-screen begin of block b_header with FRAME title b_header .
+
+SELECTION-screen begin of block b_prodct with FRAME title b_prodct.
+
+SELECTION-SCREEN: PUSHBUTTON 2(20) b_import USER-COMMAND import_product_data.
 
 SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN COMMENT 4(12) _ID.
@@ -55,10 +80,7 @@ SELECTION-screen end of block b_prodct.
 
 SELECTION-screen begin of block b_custm with FRAME title b_custm.
 
-SELECTION-SCREEN BEGIN OF LINE.
-parameters: import2 as checkbox.
-SELECTION-SCREEN COMMENT 4(50) _import2.
-SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN: PUSHBUTTON 2(20) b_impor2 USER-COMMAND import_customer_data.
 
 SELECTION-SCREEN BEGIN OF LINE.
 SELECTION-SCREEN COMMENT 4(12) _ID2.
@@ -101,20 +123,7 @@ SELECTION-SCREEN PUSHBUTTON /1(10) clear_t2 USER-COMMAND pushbutton4.
 SELECTION-screen end of block b_custm.
 
 SELECTION-screen begin of block extern with FRAME title extern.
-
-SELECTION-screen begin of block b_first with FRAME title b_first.
-SELECTION-SCREEN BEGIN OF LINE.
-parameters: ch_store as checkbox.
-SELECTION-SCREEN COMMENT 4(60) _store.
-SELECTION-SCREEN END OF LINE.
-SELECTION-screen end of block b_first.
-
-SELECTION-screen begin of block b_secon with FRAME title b_secon.
-SELECTION-SCREEN BEGIN OF LINE.
-parameters: ch_cust as checkbox.
-SELECTION-SCREEN COMMENT 4(60) _cust.
-SELECTION-SCREEN END OF LINE.
-SELECTION-screen end of block b_secon.
+SELECTION-SCREEN PUSHBUTTON /1(10) implemt USER-COMMAND TODO.
 
 SELECTION-screen begin of block b_third with FRAME title b_third.
 SELECTION-SCREEN BEGIN OF LINE.

@@ -2,10 +2,13 @@
 *&  Include  z_initialization
 *&---------------------------------------------------------------------*
 initialization.
-  b_header = `A real gamestore simulation`.
+  b_header = `A Real Store simulation`.
 
-  b_prodct = `Insert a product into Product table`.
+  popup = 'Import Data'.
+  b_import = |{ icon_activity }Import data|.
   _import1 = `Import pre-defined products!`.
+  _store = `External file: Found!`.
+
   _ID = `ID`.
   _name = `Name`.
   _desc = `Description`.
@@ -17,7 +20,12 @@ initialization.
   clear_bt = `Clear`.
 
   b_custm = 'Insert Customer into Customer table'.
-  _import2 = 'Import pre-defined Customers'.
+
+  popup2 = 'Import Data'.
+  b_impor2 = |{ icon_activity }Import data|.
+  _import2 = `Import pre-defined products!`.
+  _cust = `External file: Found!`.
+
   _id2 = 'ID'.
   _name2 = 'Name'.
   _email = 'Email'.
@@ -29,13 +37,12 @@ initialization.
   clear_t2 = `Clear`.
 
   extern = `Import Data from extern files`.
-  b_first = `Products`.
-  b_secon = `Customer List`.
   b_third = `Customers cart`.
   b_forth = `Customer Reviews`.
 
-  _store = `Found!, want to import them?`.
-  _cust = `Found!, want to import them?`.
+  popup3 = `TODO`.
+  implemt = `TODO`.
+  _todo = `TODO`.
   _cart = `Found!, want to import them?`.
   _review = `Found!, want to import them?`.
 
@@ -62,7 +69,7 @@ initialization.
     endif.
   endif.
   " Setting the boolean values to their initialize state
-  check_store = abap_false.
-  check_customer = abap_false.
-  check_customer_cart = abap_false.
-  check_customer_reviews = abap_false.
+  "check_store = abap_false.
+  "check_customer = abap_false.
+  " check_customer_cart = abap_false.
+  "check_customer_reviews = abap_false.

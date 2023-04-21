@@ -5,7 +5,6 @@ INCLUDE z_process_table.
 
 DATA: comments_table TYPE slis_t_listheader,
       comments       TYPE slis_listheader.
-
 "********************************************************************************
 "* Subroutine: top_of_page
 "* Purpose: Append the comments to the comments table
@@ -85,7 +84,6 @@ ENDCLASS.
 "* Purpose: IMPLEMENTATION for Store Inventory
 "********************************************************************************
 CLASS store IMPLEMENTATION.
-
   "********************************************************************************
   "* Method: add_product
   "* Purpose: Adds a new product to the inventory if a similar product with the same ID does not already exist.
