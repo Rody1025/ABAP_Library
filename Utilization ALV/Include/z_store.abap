@@ -3,6 +3,7 @@
 *&---------------------------------------------------------------------*.
 INCLUDE z_process_table.
 
+
 DATA: comments_table TYPE slis_t_listheader,
       comments       TYPE slis_listheader.
 "********************************************************************************
@@ -34,7 +35,7 @@ CLASS Store DEFINITION inheriting from Operations.
                   returning value(result)    type string,
 
       find_by_keyword IMPORTING
-                        keyword TYPE string,
+                         keyword TYPE string,
 
       find_by_price_range IMPORTING
                             start TYPE p
@@ -478,3 +479,59 @@ CLASS store IMPLEMENTATION.
     endif.
   ENDMETHOD.
 ENDCLASS.
+
+class Z_TESTING definition final for testing
+  duration short
+  risk level harmless.
+
+  private section.
+    DATA: gamestore TYPE REF TO Store.
+    methods:
+      setup,
+      test_add_product FOR TESTING.
+endclass.
+
+class Z_TESTING implementation.
+  method setup.
+    gamestore = new Store( ).
+    gamestore->add_product(
+                         ID = 1
+                         name = 'product 1'
+                         desc = 'This is product 1'
+                         category = 'category 1'
+                         price = '10.00'
+                         production_date = '20220101'
+                         is_available = abap_true ).
+    gamestore->add_product(
+                           ID = 2
+                           name = 'product 2'
+                           desc = 'This is product 2'
+                           category = 'category 2'
+                           price = '20.00'
+                           production_date = '20220102'
+                           is_available = abap_true ).
+    gamestore->add_product(
+                           ID = 3
+                           name = 'product 3'
+                           desc = 'This is product 3'
+                           category = 'category 3'
+                           price = '30.00'
+                           production_date = '20220103'
+                           is_available = abap_true ).
+
+    gamestore->init_ALV_columns(  ).
+  endmethod.
+
+  METHOD test_add_product.
+    DATA(result) = gamestore->add_product( ID = 1
+                                       name = 'Product 1'
+                                       desc = 'Description of Product 1'
+                                       category = 'Category 1'
+                                       price = '10.00'
+                                       production_date = '20220101'
+                                       is_available = abap_true ).
+
+    cl_abap_unit_assert=>assert_equals( act = result
+                                        exp = 'Itme has been inserted. You have (1) items' ).
+  ENDMETHOD.
+endclass.
